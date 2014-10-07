@@ -29,18 +29,7 @@
           var frameTextX = 40
           var frameStartX = 55
 
-          this.startstop = new paper.Raster('stop', [1100,40])
-
-          var self = this
-          var dateNow = new Date()
-          this.startstop.onFrame = function(event){
-            var dateNew = new Date()
-            if((dateNew - dateNow) >= 1000){
-              dateNow = dateNew
-              self.startstop.visible = !self.startstop.visible
-            }
-          }
-
+          this.startstop = new paper.Raster('stop', [1125,25])
           this.addText(53, 25, 'Frames')
           this.addText(300, 25, 'Processos')
           this.addText(425, 25, 'Tabelas')
@@ -238,7 +227,7 @@
             app.showMessage("As configurações estão erradas ou incompletas!")
             return
           }
-
+          
           this.startstop.source = 'start'
           this.auto(this)
         }
