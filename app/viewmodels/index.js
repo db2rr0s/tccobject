@@ -6,7 +6,8 @@
         this.pagesB = []
         this.pagesC = []
         this.initialized = false
-        this.startstop = undefined
+        this.marker_left = undefined
+        this.marker_right = undefined
         this.callStack = ko.observable([])
         this.READ = 'R'
         this.WRITE = 'W'
@@ -23,20 +24,21 @@
 
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
-          var frameStartY = 30
-          var frameTextX = 40
-          var frameStartX = 55
+          var frameStartY = 40
+          var frameTextX = 60
+          var frameStartX = 75
 
-          this.startstop = new paper.Raster('stop', [1125,25])
-          this.addText(53, 20, 'Frames')
-          this.addText(300, 20, 'Processos')
-          this.addText(425, 20, 'Tabela de Páginas')
+          this.setMarkerSource('stop')
 
-          this.addText(435, 32, 'NP', 11)
-          this.addText(460, 32, 'NF', 11)
-          this.addText(485, 32, 'BV', 11)
-          this.addText(510, 32, 'BS', 11)
-          this.addText(535, 32, 'BR', 11)
+          this.addText(75, 30, 'Frames')
+          this.addText(300,25, 'Processos')
+          this.addText(425, 25, 'Tabela de Páginas')
+
+          this.addText(435, 37, 'NP', 11)
+          this.addText(460, 37, 'NF', 11)
+          this.addText(485, 37, 'BV', 11)
+          this.addText(510, 37, 'BS', 11)
+          this.addText(535, 37, 'BR', 11)
 
           for(var i = 1, j = frameStartY; i < 10; i++, j = j + 25){
             this.addText(frameTextX, j + 20, i)
@@ -48,9 +50,9 @@
           var pageStartX = 300
           var pageCount = 5
 
-          var pageAStartY = 35
-          var pageBStartY = 175
-          var pageCStartY = 315
+          var pageAStartY = 40
+          var pageBStartY = 180
+          var pageCStartY = 320
 
           this.addText(280, 100, 'A')
           this.addText(280, 240, 'B')
@@ -205,10 +207,26 @@
           }
         }
 
+        this.setMarkerSource = function(source){
+          var ml = source + '_left'
+          var mr = source + '_right'
+
+          if(this.marker_left === undefined)
+            this.marker_left = new paper.Raster(ml, [15,25])
+          else if(this.marker_left.source != ml)
+            this.marker_left.source = ml
+
+          if(this.marker_right === undefined)
+            this.marker_right = new paper.Raster(mr, [1125,25])
+          else if(this.marker_right.source != mr)
+            this.marker_right.source = mr
+        }
+
         this.attached = function(){
           if (!config.validateConfig()) {
                 this.initialize()
-                this.startstop = new paper.Raster('end', [1125,25])
+                this.setMarkerSource('end')
+
                 var raster = new paper.Raster('noconf')
                 raster.position = paper.view.center
 
@@ -262,7 +280,7 @@
             return
           }
 
-          this.startstop.source = 'start'
+          this.setMarkerSource('start')
           this.auto(this)
         }
 
@@ -288,7 +306,7 @@
           var call = _callStack.pop()
           self.callStack(_callStack)
           if(call === undefined){
-            self.startstop.source = 'end'
+            this.setMarkerSource('end')
             return
           }
 
