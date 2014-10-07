@@ -65,14 +65,14 @@
 
           for(var i = 1, j = pageBStartY; i <= pageCount; i++, j = j + 25){
             var rw = this.READ
-            if(rw_p1_map.indexOf(i) >= 0)
+            if(rw_p2_map.indexOf(i) >= 0)
               rw = this.WRITE
             this.drawPage(pageStartX, j, i, '#85D6FF', rw, this.pagesB)
           }
 
           for(var i = 1, j = pageCStartY; i <= pageCount; i++, j = j + 25){
             var rw = this.READ
-            if(rw_p1_map.indexOf(i) >= 0)
+            if(rw_p3_map.indexOf(i) >= 0)
               rw = this.WRITE
             this.drawPage(pageStartX, j, i, '#FFFFCC', rw, this.pagesC)
           }
@@ -240,11 +240,11 @@
               var rw = stref[i][2]
 
               if(rw == 'w') {
-                  if(proc = 'A')
+                  if(proc == 'A')
                     rw_p1_map.push(parseInt(page))
-                  else if(proc = 'B')
+                  else if(proc == 'B')
                     rw_p2_map.push(parseInt(page))
-                  else if(proc = 'C')
+                  else if(proc == 'C')
                     rw_p3_map.push(parseInt(page))
               }
             }
