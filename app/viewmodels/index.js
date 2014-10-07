@@ -28,9 +28,15 @@
           var frameStartX = 55
 
           this.startstop = new paper.Raster('stop', [1125,25])
-          this.addText(53, 25, 'Frames')
-          this.addText(300, 25, 'Processos')
-          this.addText(425, 25, 'Tabelas')
+          this.addText(53, 20, 'Frames')
+          this.addText(300, 20, 'Processos')
+          this.addText(425, 20, 'Tabela de Páginas')
+
+          this.addText(435, 32, 'NP', 11)
+          this.addText(460, 32, 'NF', 11)
+          this.addText(485, 32, 'BV', 11)
+          this.addText(510, 32, 'BS', 11)
+          this.addText(535, 32, 'BR', 11)
 
           for(var i = 1, j = frameStartY; i < 10; i++, j = j + 25){
             this.addText(frameTextX, j + 20, i)
@@ -42,9 +48,9 @@
           var pageStartX = 300
           var pageCount = 5
 
-          var pageAStartY = 30
-          var pageBStartY = 170
-          var pageCStartY = 310
+          var pageAStartY = 35
+          var pageBStartY = 175
+          var pageCStartY = 315
 
           this.addText(280, 100, 'A')
           this.addText(280, 240, 'B')
@@ -89,29 +95,30 @@
           this.addText(pageStartX + 135, j + 20, i)
 
           this.addRect(pageStartX + 155, j, 25, 25)
-
           var fn = this.addText(pageStartX + 160, j + 20, '')
 
           this.addRect(pageStartX + 180, j, 25, 25)
-
           var bv = this.addText(pageStartX + 185, j + 20, '')
 
           this.addRect(pageStartX + 205, j, 25, 25)
+          var bs = this.addText(pageStartX + 210, j + 20, '')
 
-          var br = this.addText(pageStartX + 210, j + 20, '')
+          this.addRect(pageStartX + 230, j, 25, 25)
+          var br = this.addText(pageStartX + 240, j + 20, '')
 
           var group = new paper.Group([page,label,label2])
           group.fn = fn
           group.bv = bv
+          group.bs = bs
           group.br = br
           group.rw = rw
           bucket.push(group)
         }
 
-        this.addText = function(x, y, content){
+        this.addText = function(x, y, content, fontSize){
             var text = new paper.PointText({
               point: [x, y],
-              fontSize: 18,
+              fontSize: fontSize || 18,
               fillColor: 'black',
               content: content
             })
@@ -151,7 +158,8 @@
                   callback()
               }
             }
-          }
+          } else if(callback)
+            callback()
         }
 
         this.movePageToFrame = function(page, frame, callback){
@@ -164,6 +172,10 @@
             page.bv.content = 'X'
             page.br.content = 'X'
             page.fn.content = frame.number
+            if(page.rw == this.WRITE)
+              page.bs.content = 'X'
+            else
+              page.bs.content = ''
             item.onFrame = function(event){
               var orig = item.position
               var vector = new paper.Point(dest.x - orig.x, dest.y - orig.y)
@@ -175,7 +187,8 @@
                   callback()
               }
             }
-          }
+          } else if(callback)
+            callback()
         }
 
         this.discardPage = function(page){

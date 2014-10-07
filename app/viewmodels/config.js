@@ -6,8 +6,7 @@
         politicaAlocacaoFrames: ko.observable(),
         escopoSubstituicao: ko.observable(['1']),
 
-        //stringReferencia: ko.observable('A1r '),
-        stringReferencia: ko.observable([]),
+        stringReferencia: ko.observable(['A1w', 'B2r']),
 
         getConfig: function () {
 
