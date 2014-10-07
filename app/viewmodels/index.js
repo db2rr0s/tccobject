@@ -8,7 +8,6 @@
         this.initialized = false
         this.startstop = undefined
         this.callStack = []
-        this.actual = undefined
 
         this.initialize = function(){
           if(!this.initialized){
@@ -26,7 +25,7 @@
 
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
-          var frameStartY = 10
+          var frameStartY = 30
           var frameTextX = 40
           var frameStartX = 55
 
@@ -42,64 +41,27 @@
             }
           }
 
-          this.actual = new paper.PointText({
-            point: [1000, 40],
-            fontSize: 30,
-            fillColor: 'red',
-            content: ''
-          })
+          this.addText(53, 25, 'Frames')
+          this.addText(300, 25, 'Processos')
+          this.addText(425, 25, 'Tabelas')
 
           for(var i = 1, j = frameStartY; i < 10; i++, j = j + 25){
-            new paper.PointText({
-              point: new paper.Point(frameTextX, j + 20),
-              fontSize: 20,
-              fillColor: 'black',
-              content: i
-            })
-            var rec = new paper.Path.Rectangle({
-              point: new paper.Point(frameStartX, j),
-              size: [100, 25],
-              strokeColor: "black"
-            })
-
+            this.addText(frameTextX, j + 20, i)
+            var rec = this.addRect(frameStartX, j, 100, 25)
             rec.number = i
-
             this.frames.push(rec)
           }
 
           var pageStartX = 300
-          var pageCount = 6
-//          var pageAStartY = 10
-//          var pageBStartY = 150
-//          var pageCStartY = 290
+          var pageCount = 5
 
-          var pageAStartY = 10
-          var pageBStartY = 180
-          var pageCStartY = 350
+          var pageAStartY = 30
+          var pageBStartY = 170
+          var pageCStartY = 310
 
-          new paper.PointText({
-            //point: new paper.Point(280, 80),
-            point: new paper.Point(280, 90),
-            fontSize: 20,
-            fillColor: 'black',
-            content: 'A'
-          })
-
-          new paper.PointText({
-            //point: new paper.Point(280, 220),
-            point: new paper.Point(280, 260),
-            fontSize: 20,
-            fillColor: 'black',
-            content: 'B'
-          })
-
-          new paper.PointText({
-            //point: new paper.Point(280, 360),
-            point: new paper.Point(280, 430),
-            fontSize: 20,
-            fillColor: 'black',
-            content: 'C'
-          })
+          this.addText(280, 100, 'A')
+          this.addText(280, 240, 'B')
+          this.addText(280, 380, 'C')
 
           for(var i = 1, j = pageAStartY; i <= pageCount; i++, j = j + 25){
             var rw = 'R'
@@ -126,78 +88,30 @@
         }
 
         this.drawPage = function(pageStartX, j, i, color, rw, bucket){
-          var page = new paper.Path.Rectangle({
-            point: new paper.Point(pageStartX, j),
-            size: [100, 25],
-            strokeColor: 'black',
-            fillColor: color
-          })
+          var page = this.addRect(pageStartX, j, 100, 25, color)
 
-          var label = new paper.PointText({
-            point: new paper.Point(pageStartX + 40, j + 20),
-            fontSize: 20,
-            fillColor: 'black',
-            content: i
-          })
-
+          var label = this.addText(pageStartX + 40, j + 20, i)
           var label2 = new paper.PointText({
-            point: new paper.Point(pageStartX + 80, j + 20),
+            point: [pageStartX + 80, j + 20],
             fontSize: 8,
             fillColor: 'red',
             content: rw
           })
 
-          new paper.Path.Rectangle({
-            point: new paper.Point(pageStartX + 130, j),
-            size: [25, 25],
-            strokeColor: 'black'
-          })
+          this.addRect(pageStartX + 130, j, 25, 25)
+          this.addText(pageStartX + 135, j + 20, i)
 
-          new paper.PointText({
-            point: new paper.Point(pageStartX + 135, j + 20),
-            fontSize: 20,
-            fillColor: 'black',
-            content: i
-          })
+          this.addRect(pageStartX + 155, j, 25, 25)
 
-          new paper.Path.Rectangle({
-            point: new paper.Point(pageStartX + 155, j),
-            size: [25, 25],
-            strokeColor: 'black'
-          })
+          var fn = this.addText(pageStartX + 160, j + 20, '')
 
-          var fn = new paper.PointText({
-            point: new paper.Point(pageStartX + 160, j + 20),
-            fontSize: 20,
-            fillColor: 'black',
-            content: ''
-          })
+          this.addRect(pageStartX + 180, j, 25, 25)
 
-          new paper.Path.Rectangle({
-            point: new paper.Point(pageStartX + 180, j),
-            size: [25, 25],
-            strokeColor: 'black'
-          })
+          var bv = this.addText(pageStartX + 185, j + 20, '')
 
-          var bv = new paper.PointText({
-            point: new paper.Point(pageStartX + 185, j + 20),
-            fontSize: 20,
-            fillColor: 'black',
-            content: ''
-          })
+          this.addRect(pageStartX + 205, j, 25, 25)
 
-          new paper.Path.Rectangle({
-            point: new paper.Point(pageStartX + 205, j),
-            size: [25, 25],
-            strokeColor: 'black'
-          })
-
-          var br = new paper.PointText({
-            point: new paper.Point(pageStartX + 210, j + 20),
-            fontSize: 20,
-            fillColor: 'black',
-            content: ''
-          })
+          var br = this.addText(pageStartX + 210, j + 20, '')
 
           var group = new paper.Group([page,label,label2])
           group.fn = fn
@@ -206,9 +120,32 @@
           bucket.push(group)
         }
 
+        this.addText = function(x, y, content){
+            var text = new paper.PointText({
+              point: [x, y],
+              fontSize: 18,
+              fillColor: 'black',
+              content: content
+            })
+
+            return text
+        }
+
+        this.addRect = function(x, y, w, h, c){
+          var rect = new paper.Path.Rectangle({
+            point: new paper.Point(x, y),
+            size: [w, h],
+            strokeColor: 'black',
+            fillColor: c
+          })
+
+          return rect
+        }
+
         this.movePageBack = function(page){
           if(page.childInFrame){
             var item = page.childInFrame
+            item.bringToFront()
             var dest = page.position
             page.bv.content = ''
             page.br.content = ''
@@ -231,6 +168,7 @@
           if(!page.childInFrame){
             var dest = frame.position
             var item = page.clone()
+            item.bringToFront()
             page.opacity = 0.3
             page.childInFrame = item
             page.bv.content = 'X'
@@ -242,6 +180,7 @@
               item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
               if(vector.length <= 3){
                 item.onFrame = undefined
+                item.position = dest
                 if(callback)
                   callback()
               }
@@ -259,13 +198,7 @@
                     raster.rotate(1)
                 }
 
-                var text = new paper.PointText({
-                    point: new paper.Point(paper.view.center.x, paper.view.center.y + 100),
-                    justification: 'center',
-                    fontSize: 20,
-                    fillColor: 'red',
-                    content: 'CONFIGURAÇÕES INCOMPLETAS'
-                })
+                this.addText(paper.view.center.x, paper.view.center.y + 100, 'CONFIGURAÇÕES INCOMPLETAS')
 
                 return
             }
@@ -328,7 +261,7 @@
             self.startstop.source = 'stop'
             return
           }
-          self.actual.content = call
+
           var index = parseInt(call[1]) - 1
           switch(call[0]){
             case 'A':
@@ -343,7 +276,7 @@
         }
 
         this.stepByStep = function(){
-          this.movePageBack(this.pagesA[5])
+          this.movePageBack(this.pagesA[0])
         }
       }
     }
