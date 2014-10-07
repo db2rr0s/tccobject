@@ -8,6 +8,8 @@
         this.initialized = false
         this.startstop = undefined
         this.callStack = ko.observable([])
+        this.READ = 'R'
+        this.WRITE = 'W'
 
         this.initialize = function(){
           if(!this.initialized){
@@ -49,23 +51,23 @@
           this.addText(280, 380, 'C')
 
           for(var i = 1, j = pageAStartY; i <= pageCount; i++, j = j + 25){
-            var rw = 'R'
+            var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
-              rw = 'W'
+              rw = this.WRITE
             this.drawPage(pageStartX, j, i, '#99FF99', rw, this.pagesA)
           }
 
           for(var i = 1, j = pageBStartY; i <= pageCount; i++, j = j + 25){
-            var rw = 'R'
+            var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
-              rw = 'W'
+              rw = this.WRITE
             this.drawPage(pageStartX, j, i, '#85D6FF', rw, this.pagesB)
           }
 
           for(var i = 1, j = pageCStartY; i <= pageCount; i++, j = j + 25){
-            var rw = 'R'
+            var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
-              rw = 'W'
+              rw = this.WRITE
             this.drawPage(pageStartX, j, i, '#FFFFCC', rw, this.pagesC)
           }
 
@@ -102,6 +104,7 @@
           group.fn = fn
           group.bv = bv
           group.br = br
+          group.rw = rw
           bucket.push(group)
         }
 
@@ -127,7 +130,7 @@
           return rect
         }
 
-        this.movePageBack = function(page){
+        this.movePageBack = function(page, callback){
           if(page.childInFrame){
             var item = page.childInFrame
             item.bringToFront()
@@ -144,6 +147,8 @@
                 page.opacity = 1
                 page.childInFrame = undefined
                 item.opacity = 0
+                if(callback)
+                  callback()
               }
             }
           }
@@ -170,6 +175,20 @@
                   callback()
               }
             }
+          }
+        }
+
+        this.discardPage = function(page){
+          if(page.childInFrame){
+            var item = page.childInFrame
+            item.bringToFront()
+            page.bv.content = ''
+            page.br.content = ''
+            page.fn.content = ''
+            page.opacity = 1
+            page.childInFrame = undefined
+            item.onFrame = undefined
+            item.opacity = 0
           }
         }
 
@@ -243,11 +262,20 @@
 
         a = 0
         this.auto = function(self){
+          if(a > 8){
+            a = 0
+            if(self.pagesA[a].rw == this.WRITE){
+              self.movePageBack(self.pagesA[a], self.autoClosure(self))
+              return
+            }
+            else
+              self.discardPage(self.pagesA[a])
+          }
           var _callStack = self.callStack()
           var call = _callStack.pop()
           self.callStack(_callStack)
           if(call === undefined){
-            self.startstop.source = 'stop'
+            self.startstop.source = 'end'
             return
           }
 
@@ -262,13 +290,10 @@
             case 'C':
               self.movePageToFrame(self.pagesC[index], self.frames[a++], self.autoClosure(self))
           }
-
-          if(a > 8)
-            a = 0
         }
 
         this.stepByStep = function(){
-          this.movePageBack(this.pagesA[0])
+          this.discardPage(this.pagesA[0])
         }
       }
     }
