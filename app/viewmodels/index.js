@@ -243,7 +243,7 @@
               if(vector.length <= 3){
                 item.onFrame = undefined
                 if(callback)
-                  callback(callback)
+                  callback()
               }
             }
           }
@@ -317,7 +317,9 @@
 
         this.autoClosure = function(self){
           var self = self
-          return this.auto(self)
+          return function(){
+            self.auto(self)
+          }
         }
 
         this.auto = function(self){
