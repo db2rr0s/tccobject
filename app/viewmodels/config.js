@@ -7,7 +7,7 @@
         escopoSubstituicao: ko.observable(['1']),
 
         //stringReferencia: ko.observable('A1r '),
-        stringReferencia: ko.observable(['A1r', 'B2w']),
+        stringReferencia: ko.observable([]),
 
         getConfig: function () {
 
@@ -47,7 +47,7 @@
         },
         removePage: function(){
           var stref = this.stringReferencia()
-          stref.pop()          
+          stref.pop()
           this.stringReferencia(stref)
         },
         attached: function(){

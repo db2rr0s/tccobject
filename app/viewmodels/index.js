@@ -205,7 +205,7 @@
 
             var conf = config.getConfig()
 
-            var stref = conf.stringReferencia
+            var stref = conf.stringReferencia.slice(0)
 
             var rw_p1_map = []
             var rw_p2_map = []
@@ -250,6 +250,7 @@
           }
         }
 
+        a = 0
         this.auto = function(self){
           var _callStack = self.callStack()
           var call = _callStack.pop()
@@ -262,14 +263,17 @@
           var index = parseInt(call[1]) - 1
           switch(call[0]){
             case 'A':
-              self.movePageToFrame(self.pagesA[index], self.frames[1], self.autoClosure(self))
+              self.movePageToFrame(self.pagesA[index], self.frames[a++], self.autoClosure(self))
             break
             case 'B':
-              self.movePageToFrame(self.pagesB[index], self.frames[1], self.autoClosure(self))
+              self.movePageToFrame(self.pagesB[index], self.frames[a++], self.autoClosure(self))
             break
             case 'C':
-              self.movePageToFrame(self.pagesC[index], self.frames[1], self.autoClosure(self))
+              self.movePageToFrame(self.pagesC[index], self.frames[a++], self.autoClosure(self))
           }
+
+          if(a > 8)
+            a = 0
         }
 
         this.stepByStep = function(){
