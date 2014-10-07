@@ -6,7 +6,8 @@
         politicaAlocacaoFrames: ko.observable(),
         escopoSubstituicao: ko.observable(['1']),
 
-        stringReferencia: ko.observable('A1r '),
+        //stringReferencia: ko.observable('A1r '),
+        stringReferencia: ko.observable(['A1r', 'B2w']),
 
         getConfig: function () {
 
@@ -29,7 +30,7 @@
                 escopoSubstituicao = this.escopoSubstituicao()[0],
                 stringReferencia = this.stringReferencia()
 
-            if (algoritmo === '' || politicaBusca === '' || politicaAlocacao === '' || escopoSubstituicao === '' || stringReferencia === '')
+            if (algoritmo === '' || politicaBusca === '' || politicaAlocacao === '' || escopoSubstituicao === '' || stringReferencia.length < 1)
                 return false;
             return true;
         },
@@ -37,32 +38,28 @@
           var stref = this.stringReferencia()
           var page = event.target.value
           var rw = $('#rw' + page)
-          if(rw.is(':checked')){
-            this.stringReferencia(stref + page + 'w' + ' ')
-          } else {
-            this.stringReferencia(stref + page + 'r' + ' ')
-          }
+          if(rw.is(':checked'))
+            stref.push(page + 'w')
+          else
+            stref.push(page + 'r')
+          this.stringReferencia(stref)
           rw.attr('disabled', true)
         },
         removePage: function(){
           var stref = this.stringReferencia()
-          this.stringReferencia(stref.slice(0,-4))
+          stref.pop()          
+          this.stringReferencia(stref)
         },
         attached: function(){
           var stref = this.stringReferencia()
 
-          if(stref != ''){
-            stref = stref.split(' ')
-            for(var i = 0; i < stref.length; i++){
-              if(stref[i] == '') continue
+          for(var i = 0; i < stref.length; i++){
+            var rw = $('#rw' + stref[i][0] + stref[i][1])
+            if(stref[i][2] == 'w')
+              rw.attr('checked', true)
 
-              var rw = $('#rw' + stref[i][0] + stref[i][1])
-              if(stref[i][2] == 'w')
-                rw.attr('checked', true)
-
-              rw.attr('disabled', true)
-            }
+            rw.attr('disabled', true)
           }
         }
-    }
+      }
 })

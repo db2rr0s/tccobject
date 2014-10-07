@@ -7,7 +7,7 @@
         this.pagesC = []
         this.initialized = false
         this.startstop = undefined
-        this.callStack = []
+        this.callStack = ko.observable(['P0'])
 
         this.initialize = function(){
           if(!this.initialized){
@@ -205,18 +205,17 @@
 
             var conf = config.getConfig()
 
-            var stref = conf.stringReferencia.split(' ')
-            var stref_html = ''
+            var stref = conf.stringReferencia
+
             var rw_p1_map = []
             var rw_p2_map = []
             var rw_p3_map = []
 
             for(var i = 0; i < stref.length; i++){
-              if(stref[i] == '')continue
               var proc = stref[i][0]
               var page = stref[i][1]
               var rw = stref[i][2]
-              stref_html += proc + page + ' '
+
               if(rw == 'w') {
                   if(proc = 'A')
                     rw_p1_map.push(parseInt(page))
@@ -225,13 +224,10 @@
                   else if(proc = 'C')
                     rw_p3_map.push(parseInt(page))
               }
-
-              this.callStack.push(proc + page)
             }
 
-            this.callStack.reverse()
-
-            $('#refstring').html(stref_html)
+            stref.reverse()
+            this.callStack(stref)
 
             this.load(rw_p1_map, rw_p2_map, rw_p3_map)
         }
@@ -244,7 +240,6 @@
           }
 
           this.startstop.source = 'start'
-
           this.auto(this)
         }
 
@@ -256,7 +251,9 @@
         }
 
         this.auto = function(self){
-          var call = self.callStack.pop()
+          var _callStack = self.callStack()
+          var call = _callStack.pop()
+          self.callStack(_callStack)
           if(call === undefined){
             self.startstop.source = 'stop'
             return
