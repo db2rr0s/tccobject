@@ -7,7 +7,7 @@
         this.pagesC = []
         this.initialized = false
         this.startstop = undefined
-        this.callStack = ko.observable(['P0'])
+        this.callStack = ko.observable([])
 
         this.initialize = function(){
           if(!this.initialized){
@@ -17,10 +17,6 @@
           }
 
           paper.project.clear()
-        }
-
-        this.attached = function(){
-          this.initialize()
         }
 
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
@@ -180,6 +176,7 @@
         this.attached = function(){
           if (!config.validateConfig()) {
                 this.initialize()
+                this.startstop = new paper.Raster('end', [1125,25])
                 var raster = new paper.Raster('noconf')
                 raster.position = paper.view.center
 
@@ -187,13 +184,18 @@
                     raster.rotate(1)
                 }
 
-                this.addText(paper.view.center.x, paper.view.center.y + 100, 'CONFIGURAÇÕES INCOMPLETAS')
+                new paper.PointText({
+                  point: new paper.Point(paper.view.center.x, paper.view.center.y + 100),
+                  justification: 'center',
+                  fontSize: 20,
+                  fillColor: 'red',
+                  content: 'CONFIGURAÇÕES INCOMPLETAS'
+                })
 
                 return
             }
 
             var conf = config.getConfig()
-
             var stref = conf.stringReferencia.slice(0)
 
             var rw_p1_map = []
@@ -227,7 +229,7 @@
             app.showMessage("As configurações estão erradas ou incompletas!")
             return
           }
-          
+
           this.startstop.source = 'start'
           this.auto(this)
         }
