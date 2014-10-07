@@ -1,0 +1,71 @@
+﻿.pA {
+    width: 100px;
+    height: 25px;
+    background: #AA3939;
+    border: 1px solid #000;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    text-align: center;
+    padding-top:4px;
+    color:white;
+}
+
+.pB {
+    width: 100px;
+    height: 25px;
+    background: #06B66B;
+    border: 1px solid #000;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    text-align: center;
+    padding-top:4px;
+    color:white;
+}
+
+.pC {
+    width: 100px;
+    height: 25px;
+    background: #7DA0BB;
+    border: 1px solid #000;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    text-align: center;
+    padding-top:4px;
+    color:white;
+}
+
+.frame {
+    width: 100px;
+    height: 25px;
+    background: #148a88;
+    border: 1px solid #000;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    text-align: center;
+    padding-top:4px;
+    color:white;
+}
+
+
+#simulador {
+    -webkit-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.75);
+
+    border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+    border: 0px solid #000000;
+
+
+    /*
+        background: url('http://api.thumbr.it/whitenoise-361x370.png?background=4ea6caff&noise=626262&density=28&opacity=95')
+        */
+
+    background: url('http://api.thumbr.it/whitenoise-361x370.png?background=#B4CD91ff&noise=626262&density=15&opacity=69')
+    
+}

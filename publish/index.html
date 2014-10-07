@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>TCCObject</title>
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-theme.min.css" rel="stylesheet" />
+    <link href="Content/durandal.css" rel="stylesheet" />
+    <link href="Content/style.css" rel="stylesheet" />
+    <script type="text/javascript">
+        if (navigator.appName.indexOf('Microsoft') >= 0 ||
+            (navigator.appName.indexOf('Netscape') >= 0 && navigator.userAgent.match("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})"))) {
+            setTimeout(function () {
+                var imgLoading = document.getElementById('imgLoading');
+                imgLoading.setAttribute('src', 'Content/images/noie.png');
+                imgLoading.setAttribute('onclick', 'window.location.href = \'https://www.google.com/chrome/browser/\'');
+            }, 2000);
+        } else {
+            document.addEventListener("DOMContentLoaded", function () {
+                var script = document.createElement('script')
+                script.setAttribute('src', 'Scripts/require.js')
+                script.setAttribute('data-main', 'app/main')
+                document.body.appendChild(script)
+            });
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div id="applicationHost">
+            <div style="text-align: center; margin: 10% 0 0 0;">
+                <h1 style="">TCCObject</h1>
+                <img id="imgLoading" src="Content/images/load.gif" alt="carregando..." />
+            </div>
+        </div>
+    </form>
+</body>
+</html>
