@@ -2,9 +2,7 @@
     return function () {
         this.title = "TCCObject"
         this.frames = []
-        this.pagesA = []
-        this.pagesB = []
-        this.pagesC = []
+        this.pages = []
         this.initialized = false
         this.marker_left = undefined
         this.marker_right = undefined
@@ -62,59 +60,65 @@
             var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
               rw = this.WRITE
-            this.drawPage(pageStartX, j, i, '#99FF99', rw, this.pagesA)
+
+            var page = new Page('A', i, rw)
+            this.drawPage(page, pageStartX, j, '#99FF99')
           }
 
           for(var i = 1, j = pageBStartY; i <= pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p2_map.indexOf(i) >= 0)
               rw = this.WRITE
-            this.drawPage(pageStartX, j, i, '#85D6FF', rw, this.pagesB)
+
+            var page = new Page('B', i, rw)
+            this.drawPage(page, pageStartX, j, '#85D6FF')
           }
 
           for(var i = 1, j = pageCStartY; i <= pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p3_map.indexOf(i) >= 0)
               rw = this.WRITE
-            this.drawPage(pageStartX, j, i, '#FFFFCC', rw, this.pagesC)
+
+            var page = new Page('C', i, rw)
+            this.drawPage(page, pageStartX, j, '#FFFFCC')
           }
 
           paper.view.draw()
         }
 
-        this.drawPage = function(pageStartX, j, i, color, rw, bucket){
-          var page = this.addRect(pageStartX, j, 100, 25, color)
+        this.drawPage = function(page, x, y, color){
+          var pageRect = this.addRect(x, y, 100, 25, color)
 
-          var label = this.addText(pageStartX + 40, j + 20, i)
+          var label = this.addText(x + 40, y + 20, page.number)
           var label2 = new paper.PointText({
-            point: [pageStartX + 80, j + 20],
+            point: [x + 80, y + 20],
             fontSize: 8,
             fillColor: 'red',
-            content: rw
+            content: page.rw
           })
 
-          this.addRect(pageStartX + 130, j, 25, 25)
-          this.addText(pageStartX + 135, j + 20, i)
+          this.addRect(x + 130, y, 25, 25)
+          this.addText(x + 135, y + 20, page.number)
 
-          this.addRect(pageStartX + 155, j, 25, 25)
-          var fn = this.addText(pageStartX + 160, j + 20, '')
+          this.addRect(x + 155, y, 25, 25)
+          var fn = this.addText(x + 160, y + 20, '')
 
-          this.addRect(pageStartX + 180, j, 25, 25)
-          var bv = this.addText(pageStartX + 185, j + 20, '')
+          this.addRect(x + 180, y, 25, 25)
+          var bv = this.addText(x + 185, y + 20, '')
 
-          this.addRect(pageStartX + 205, j, 25, 25)
-          var bs = this.addText(pageStartX + 210, j + 20, '')
+          this.addRect(x + 205, y, 25, 25)
+          var bs = this.addText(x + 210, y + 20, '')
 
-          this.addRect(pageStartX + 230, j, 25, 25)
-          var br = this.addText(pageStartX + 240, j + 20, '')
+          this.addRect(x + 230, y, 25, 25)
+          var br = this.addText(x + 240, y + 20, '')
 
-          var group = new paper.Group([page,label,label2])
+          var group = new paper.Group([pageRect,label,label2])
           group.fn = fn
           group.bv = bv
           group.bs = bs
           group.br = br
-          group.rw = rw
-          bucket.push(group)
+          page.setObject(group)
+          this.pages.push(page)
         }
 
         this.addText = function(x, y, content, fontSize){
@@ -140,21 +144,21 @@
         }
 
         this.movePageBack = function(page, callback){
-          if(page.childInFrame){
-            var item = page.childInFrame
+          if(page.object.childInFrame){
+            var item = page.object.childInFrame
             item.bringToFront()
-            var dest = page.position
-            page.bv.content = ''
-            page.br.content = ''
-            page.fn.content = ''
+            var dest = page.object.position
+            page.object.bv.content = ''
+            page.object.br.content = ''
+            page.object.fn.content = ''
             item.onFrame = function(event){
               var orig = item.position
               var vector = new paper.Point(dest.x - orig.x, dest.y - orig.y)
               item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
               if(vector.length <= 2){
                 item.onFrame = undefined
-                page.opacity = 1
-                page.childInFrame = undefined
+                page.object.opacity = 1
+                page.object.childInFrame = undefined
                 item.opacity = 0
                 if(callback)
                   callback()
@@ -164,20 +168,21 @@
             callback()
         }
 
-        this.movePageToFrame = function(page, frame, callback){
-          if(!page.childInFrame){
+        this.movePageToFrame = function(context, page, frameNumber, callback){
+          if(!page.object.childInFrame){
+            var frame = context.frames[frameNumber - 1]
             var dest = frame.position
-            var item = page.clone()
+            var item = page.object.clone()
             item.bringToFront()
-            page.opacity = 0.3
-            page.childInFrame = item
-            page.bv.content = 'X'
-            page.br.content = 'X'
-            page.fn.content = frame.number
-            if(page.rw == this.WRITE)
-              page.bs.content = 'X'
+            page.object.opacity = 0.3
+            page.object.childInFrame = item
+            page.object.bv.content = 'X'
+            page.object.br.content = 'X'
+            page.object.fn.content = frame.number
+            if(page.rw == context.WRITE)
+              page.object.bs.content = 'X'
             else
-              page.bs.content = ''
+              page.object.bs.content = ''
             item.onFrame = function(event){
               var orig = item.position
               var vector = new paper.Point(dest.x - orig.x, dest.y - orig.y)
@@ -269,21 +274,29 @@
 
             stref.reverse()
             this.callStack(stref)
-
             this.load(rw_p1_map, rw_p2_map, rw_p3_map)
         }
 
         this.start = function () {
-
           if(!config.validateConfig()){
             app.showMessage("As configurações estão erradas ou incompletas!")
             return
           }
 
           this.setMarkerSource('start')
-          //this.auto(this)
+          var manager = new Manager(this, this.frames.length, this.movePageToFrame, this.movePageBack)
+          manager.start()
+        }
 
-          var manager = new Manager(this.movePageToFrame, this.movePageBack)
+        this.findPage = function(page){
+          for(var i = 0; i < this.pages.length; i++){
+            var aux = this.pages[i]
+            if(page.equals(aux))
+              return aux
+          }
+        }
+
+        this.nextPage = function(self){
 
           var _callStack = this.callStack()
           var call = _callStack.pop()
@@ -296,46 +309,8 @@
 
           var page = new Page()
           page.parse(call)
-          manager.start(page)
-        }
 
-        this.autoClosure = function(self){
-          var self = self
-          return function(){
-            self.auto(self)
-          }
-        }
-
-        a = 0
-        this.auto = function(self){
-          if(a > 8){
-            a = 0
-            if(self.pagesA[a].rw == this.WRITE){
-              self.movePageBack(self.pagesA[a], self.autoClosure(self))
-              return
-            }
-            else
-              self.discardPage(self.pagesA[a])
-          }
-          var _callStack = self.callStack()
-          var call = _callStack.pop()
-          self.callStack(_callStack)
-          if(call === undefined){
-            this.setMarkerSource('end')
-            return
-          }
-
-          var index = parseInt(call[1]) - 1
-          switch(call[0]){
-            case 'A':
-              self.movePageToFrame(self.pagesA[index], self.frames[a++], self.autoClosure(self))
-            break
-            case 'B':
-              self.movePageToFrame(self.pagesB[index], self.frames[a++], self.autoClosure(self))
-            break
-            case 'C':
-              self.movePageToFrame(self.pagesC[index], self.frames[a++], self.autoClosure(self))
-          }
+          return this.findPage(page)
         }
 
         this.stepByStep = function(){
