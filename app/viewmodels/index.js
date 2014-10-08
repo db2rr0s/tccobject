@@ -1,4 +1,4 @@
-﻿define(['durandal/app', 'viewmodels/config', 'viewmodels/algoritmos/algoritmo', 'paper', 'knockout'], function (app, config, algoritmo, paper, ko) {
+﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/Manager', 'viewmodels/Page'], function (app, ko, paper, config, Manager, Page) {
     return function () {
         this.title = "TCCObject"
         this.frames = []
@@ -281,7 +281,22 @@
           }
 
           this.setMarkerSource('start')
-          this.auto(this)
+          //this.auto(this)
+
+          var manager = new Manager(this.movePageToFrame, this.movePageBack)
+
+          var _callStack = this.callStack()
+          var call = _callStack.pop()
+          this.callStack(_callStack)
+
+          if(call === undefined){
+            this.setMarkerSource('end')
+            return
+          }
+
+          var page = new Page()
+          page.parse(call)
+          manager.start(page)
         }
 
         this.autoClosure = function(self){
