@@ -58,7 +58,7 @@
           this.addText(280, 380, 'C')
 
           var useBRFlag = false
-          if(this.configuration.algoritmo == 1){
+          if(this.configuration.algoritmo != 1){
             useBRFlag = true
           }
           for(var i = 1, j = pageAStartY; i <= pageCount; i++, j = j + 25){
