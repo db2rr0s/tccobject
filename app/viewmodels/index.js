@@ -9,6 +9,7 @@
         this.callStack = ko.observable([])
         this.READ = 'R'
         this.WRITE = 'W'
+        this.configuration = undefined
 
         this.initialize = function(){
           if(!this.initialized){
@@ -56,12 +57,16 @@
           this.addText(280, 240, 'B')
           this.addText(280, 380, 'C')
 
+          var useBRFlag = false
+          if(this.configuration.algoritmo == 1){
+            useBRFlag = true
+          }
           for(var i = 1, j = pageAStartY; i <= pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
               rw = this.WRITE
 
-            var page = new Page('A', i, rw)
+            var page = new Page('A', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#99FF99')
           }
 
@@ -70,7 +75,7 @@
             if(rw_p2_map.indexOf(i) >= 0)
               rw = this.WRITE
 
-            var page = new Page('B', i, rw)
+            var page = new Page('B', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#85D6FF')
           }
 
@@ -79,7 +84,7 @@
             if(rw_p3_map.indexOf(i) >= 0)
               rw = this.WRITE
 
-            var page = new Page('C', i, rw)
+            var page = new Page('C', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#FFFFCC')
           }
 
@@ -109,7 +114,10 @@
           this.addRect(x + 205, y, 25, 25)
           var bs = this.addText(x + 210, y + 20, '')
 
-          this.addRect(x + 230, y, 25, 25)
+          if(page.useBRFlag)
+            this.addRect(x + 230, y, 25, 25)
+          else
+            this.addRect(x + 230, y, 25, 25, undefined, 0.3)
           var br = this.addText(x + 240, y + 20, '')
 
           var group = new paper.Group([pageRect,label,label2])
@@ -132,12 +140,13 @@
             return text
         }
 
-        this.addRect = function(x, y, w, h, c){
+        this.addRect = function(x, y, w, h, c, o){
           var rect = new paper.Path.Rectangle({
             point: new paper.Point(x, y),
             size: [w, h],
             strokeColor: 'black',
-            fillColor: c
+            fillColor: c,
+            opacity: o || 1
           })
 
           return rect
@@ -149,7 +158,8 @@
             item.bringToFront()
             var dest = page.object.position
             page.object.bv.content = ''
-            page.object.br.content = ''
+            if(page.useBRFlag)
+              page.object.br.content = ''
             page.object.fn.content = ''
             item.onFrame = function(event){
               var orig = item.position
@@ -177,7 +187,8 @@
             page.object.opacity = 0.3
             page.object.childInFrame = item
             page.object.bv.content = 'X'
-            page.object.br.content = 'X'
+            if(page.useBRFlag)
+              page.object.br.content = 'X'
             page.object.fn.content = frame.number
             if(page.rw == context.WRITE)
               page.object.bs.content = 'X'
@@ -250,8 +261,8 @@
                 return
             }
 
-            var conf = config.getConfig()
-            var stref = conf.stringReferencia.slice(0)
+            this.configuration = config.getConfig()
+            var stref = this.configuration.stringReferencia.slice(0)
 
             var rw_p1_map = []
             var rw_p2_map = []

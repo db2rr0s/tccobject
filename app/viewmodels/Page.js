@@ -1,9 +1,10 @@
 define(function(require){
-  var Page = function(proc, number, rw){
+  var Page = function(proc, number, rw, br){
     this.proc = proc
     this.number = number
     this.rw = rw
     this.object = undefined
+    this.useBRFlag = (br || false)
   }
 
   Page.prototype.parse = function(str){
