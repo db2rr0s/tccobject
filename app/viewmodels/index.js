@@ -10,6 +10,7 @@
         this.READ = 'R'
         this.WRITE = 'W'
         this.configuration = undefined
+        this.manager = undefined
 
         this.initialize = function(){
           if(!this.initialized){
@@ -23,6 +24,7 @@
 
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
+          this.manager = undefined
           var frameStartY = 40
           var frameTextX = 60
           var frameStartX = 75
@@ -286,6 +288,8 @@
             stref.reverse()
             this.callStack(stref)
             this.load(rw_p1_map, rw_p2_map, rw_p3_map)
+
+            this.manager = new Manager(this, this.frames.length, this.configuration.algoritmo, this.movePageToFrame, this.movePageBack)
         }
 
         this.start = function () {
@@ -294,9 +298,12 @@
             return
           }
 
-          this.setMarkerSource('start')          
-          var manager = new Manager(this, this.frames.length, this.configuration.algoritmo, this.movePageToFrame, this.movePageBack)
-          manager.start()
+          if(this.manager.state != 0)
+            console.log("The manager is already running")
+          else {
+            this.setMarkerSource('start')
+            this.manager.start()
+          }
         }
 
         this.findPage = function(page){
@@ -325,7 +332,12 @@
         }
 
         this.stepByStep = function(){
-          this.discardPage(this.pagesA[0])
+          if(this.manager.state != 0){
+            console.log('The manager is already running')
+            return
+          }
+
+          this.manager.nextStep()
         }
       }
     }

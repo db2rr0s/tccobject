@@ -102,5 +102,19 @@ define(function(require){
     }
   }
 
+  Manager.prototype.nextStep = function(){
+    var page = this.nextPage()
+    if(page === undefined) {
+      console.log('Não há páginas')
+      return
+    }
+
+    var frame = this.getFreeFrame()
+    this.state = 1
+    this.pfmap[frame] = page
+    self = this
+    this.movePageToFrame(this.context, page, frame, function(){self.state = 0})
+  }
+
   return Manager
 })
