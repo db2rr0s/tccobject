@@ -1,4 +1,5 @@
 define(function(require){
+  var Fifo = require('viewmodels/algoritmos/Fifo')
   var Manager = function(context, totalFrames, algoritmo, movePageToFrameHandler, movePageBackHandler){
     this.algoritmo = algoritmo
     this.movePageToFrame = movePageToFrameHandler
@@ -29,7 +30,12 @@ define(function(require){
       this.busyFrames.push(frame)
       return frame
     } else {
-      // TODO: usar algoritmo
+      switch(this.algoritmo){
+        case '1':
+          var fifo = new Fifo()
+          fifo.run()
+        break;
+      }
       this.state = 2
       var aux = this.busyFrames.slice(0)
       aux.reverse()

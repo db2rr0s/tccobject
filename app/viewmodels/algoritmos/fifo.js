@@ -1,7 +1,10 @@
 ﻿define(function () {
-    return {
-        run: function (args) {
-            console.log('running fifo')
-        }
+    var Fifo = function(){
     }
+
+    Fifo.prototype.run = function(){
+      console.log('I am just running')
+    }
+
+    return Fifo
 })

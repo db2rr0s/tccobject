@@ -294,9 +294,8 @@
             return
           }
 
-          this.setMarkerSource('start')
-          var algoritmo = undefined
-          var manager = new Manager(this, this.frames.length, algoritmo, this.movePageToFrame, this.movePageBack)
+          this.setMarkerSource('start')          
+          var manager = new Manager(this, this.frames.length, this.configuration.algoritmo, this.movePageToFrame, this.movePageBack)
           manager.start()
         }
 
