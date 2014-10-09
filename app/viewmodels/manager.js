@@ -1,5 +1,6 @@
 define(function(require){
-  var Manager = function(context, totalFrames, movePageToFrameHandler, movePageBackHandler){
+  var Manager = function(context, totalFrames, algoritmo, movePageToFrameHandler, movePageBackHandler){
+    this.algoritmo = algoritmo
     this.movePageToFrame = movePageToFrameHandler
     this.movePageBack = movePageBackHandler
     this.context = context
