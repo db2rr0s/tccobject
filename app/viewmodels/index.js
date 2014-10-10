@@ -35,8 +35,8 @@
           this.addText(300,25, 'Processos')
           this.addText(425, 25, 'Tabela de Páginas')
 
-          this.addText(435, 37, 'NP', 11)
-          this.addText(460, 37, 'NF', 11)
+          this.addText(435, 37, 'PL', 11)
+          this.addText(460, 37, 'PF', 11)
           this.addText(485, 37, 'BV', 11)
           this.addText(510, 37, 'BS', 11)
           this.addText(535, 37, 'BR', 11)
