@@ -11,6 +11,10 @@
         this.WRITE = 'W'
         this.configuration = undefined
         this.manager = undefined
+        this.freeFrames = []
+        this.busyFrames = []
+        this.movedPages = []
+        this.pfmap = {}
 
         this.initialize = function(){
           if(!this.initialized){
@@ -25,6 +29,12 @@
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
           this.manager = undefined
+
+          this.freeFrames = []
+          for(var i = 8; i >= 0; i--){
+            this.freeFrames.push(i)
+          }
+
           var frameStartY = 40
           var frameTextX = 60
           var frameStartX = 75
@@ -289,7 +299,7 @@
             this.callStack(stref)
             this.load(rw_p1_map, rw_p2_map, rw_p3_map)
 
-            this.manager = new Manager(this, this.frames.length, this.configuration.algoritmo, this.movePageToFrame, this.movePageBack)
+            paper.view.onFrame = this.onFrame
         }
 
         this.start = function () {
@@ -298,37 +308,32 @@
             return
           }
 
-          if(this.manager.state != 0)
-            console.log("The manager is already running")
-          else {
-            this.setMarkerSource('start')
-            this.manager.start()
-          }
+          this.setMarkerSource('start')
+          this.active = true
         }
 
-        this.findPage = function(page){
-          for(var i = 0; i < this.pages.length; i++){
-            var aux = this.pages[i]
+        this.findPage = function(self, page){
+          for(var i = 0; i < self.pages.length; i++){
+            var aux = self.pages[i]
             if(page.equals(aux))
               return aux
           }
         }
 
         this.nextPage = function(self){
-
-          var _callStack = this.callStack()
+          var _callStack = self.callStack()
           var call = _callStack.pop()
-          this.callStack(_callStack)
+          self.callStack(_callStack)
 
           if(call === undefined){
-            this.setMarkerSource('end')
+            self.setMarkerSource('end')
             return
           }
 
           var page = new Page()
           page.parse(call)
 
-          return this.findPage(page)
+          return self.findPage(self, page)
         }
 
         this.stepByStep = function(){
@@ -338,6 +343,78 @@
           }
 
           this.manager.nextStep()
+        }
+
+        this.getFreeFrame = function(self){
+          if(self.freeFrames.length > 0){
+            var frame = self.freeFrames.pop()
+            self.busyFrames.push(frame)
+            return frame
+          } else {
+            switch(self.config.algoritmo){
+              case '1':
+                var fifo = new Fifo()
+                fifo.run()
+              break;
+            }
+            var aux = self.busyFrames.slice(0)
+            aux.reverse()
+            var frame = aux.pop()
+            self.freeFrames.push(frame)
+            return frame
+          }
+        }
+
+        this.active = false
+        this.running = false
+        this.item = undefined
+        this.dest = undefined
+        var self = this
+
+        this.onFrame = function(event){
+          if(self.active){
+            if(self.running){
+              var orig = self.item.position
+              var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
+              self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
+              if(vector.length <= 3){
+                self.item.position = self.dest
+                self.dest = undefined
+                self.item = undefined
+                self.running = false
+              }
+            } else {
+              var p = self.nextPage(self)
+
+              if(p == ''){
+                console.log('There is no page')
+                self.active = false
+              }
+
+              var page = p.object
+              var frame = self.getFreeFrame(self)
+
+              if(!page.childInFrame){
+                var frame = self.frames[frame]
+                var dest = frame.position
+                var item = page.clone()
+                item.bringToFront()
+                page.opacity = 0.3
+                page.childInFrame = item
+                page.bv.content = 'X'
+                if(page.useBRFlag)
+                  page.br.content = 'X'
+                page.fn.content = frame.number
+                if(page.rw == self.WRITE)
+                  page.bs.content = 'X'
+                else
+                  page.bs.content = ''
+                self.item = item
+                self.dest = dest
+                self.running = true
+              }
+            }
+          }
         }
       }
     }
