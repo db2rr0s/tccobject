@@ -1,4 +1,4 @@
-﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/Manager', 'viewmodels/Page'], function (app, ko, paper, config, Manager, Page) {
+﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/Page', 'viewmodels/algoritmos/Algoritmo'], function (app, ko, paper, config, Page, Algoritmo) {
     return function () {
         this.title = "TCCObject"
         this.frames = []
@@ -10,7 +10,6 @@
         this.READ = 'R'
         this.WRITE = 'W'
         this.configuration = undefined
-        this.manager = undefined
         this.freeFrames = []
         this.busyFrames = []
         this.movedPages = []
@@ -28,10 +27,10 @@
 
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
-          this.manager = undefined
 
           this.freeFrames = []
-          for(var i = 8; i >= 0; i--){
+          for(var i = 9; i > 0; i--){
+          //for(var i = 4; i > 0; i--){
             this.freeFrames.push(i)
           }
 
@@ -164,63 +163,6 @@
           return rect
         }
 
-        this.movePageBack = function(page, callback){
-          if(page.object.childInFrame){
-            var item = page.object.childInFrame
-            item.bringToFront()
-            var dest = page.object.position
-            page.object.bv.content = ''
-            if(page.useBRFlag)
-              page.object.br.content = ''
-            page.object.fn.content = ''
-            item.onFrame = function(event){
-              var orig = item.position
-              var vector = new paper.Point(dest.x - orig.x, dest.y - orig.y)
-              item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
-              if(vector.length <= 2){
-                item.onFrame = undefined
-                page.object.opacity = 1
-                page.object.childInFrame = undefined
-                item.opacity = 0
-                if(callback)
-                  callback()
-              }
-            }
-          } else if(callback)
-            callback()
-        }
-
-        this.movePageToFrame = function(context, page, frameNumber, callback){
-          if(!page.object.childInFrame){
-            var frame = context.frames[frameNumber - 1]
-            var dest = frame.position
-            var item = page.object.clone()
-            item.bringToFront()
-            page.object.opacity = 0.3
-            page.object.childInFrame = item
-            page.object.bv.content = 'X'
-            if(page.useBRFlag)
-              page.object.br.content = 'X'
-            page.object.fn.content = frame.number
-            if(page.rw == context.WRITE)
-              page.object.bs.content = 'X'
-            else
-              page.object.bs.content = ''
-            item.onFrame = function(event){
-              var orig = item.position
-              var vector = new paper.Point(dest.x - orig.x, dest.y - orig.y)
-              item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
-              if(vector.length <= 3){
-                item.onFrame = undefined
-                item.position = dest
-                if(callback)
-                  callback()
-              }
-            }
-          } else if(callback)
-            callback()
-        }
-
         this.discardPage = function(page){
           if(page.childInFrame){
             var item = page.childInFrame
@@ -350,18 +292,6 @@
             var frame = self.freeFrames.pop()
             self.busyFrames.push(frame)
             return frame
-          } else {
-            switch(self.config.algoritmo){
-              case '1':
-                var fifo = new Fifo()
-                fifo.run()
-              break;
-            }
-            var aux = self.busyFrames.slice(0)
-            aux.reverse()
-            var frame = aux.pop()
-            self.freeFrames.push(frame)
-            return frame
           }
         }
 
@@ -369,49 +299,105 @@
         this.running = false
         this.item = undefined
         this.dest = undefined
+        this.hasFreeFrames = true
+        this.moveOn = false
+        this.moveBack = false
         var self = this
 
         this.onFrame = function(event){
           if(self.active){
             if(self.running){
-              var orig = self.item.position
-              var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
-              self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
-              if(vector.length <= 3){
-                self.item.position = self.dest
-                self.dest = undefined
-                self.item = undefined
-                self.running = false
+              if(self.moveOn){
+                var orig = self.item.position
+                var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
+                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
+                if(vector.length <= 3){
+                  self.item.position = self.dest
+                  self.dest = undefined
+                  self.item = undefined
+                  self.running = false
+                  self.moveOn = false
+                }
+              } else if(self.moveBack) {
+                var orig = self.item.position
+                var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
+                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
+                if(vector.length <= 2){
+                  self.item.page.object.opacity = 1
+                  self.item.page.object.childInFrame = undefined
+                  self.item.opacity = 0
+                  self.dest = undefined
+                  self.item = self.item.nextPage
+                  self.running = false
+                  self.moveBack = false
+                  self.hasFreeFrames = true
+                }
               }
             } else {
-              var p = self.nextPage(self)
+              if(self.hasFreeFrames) {
+                var page
+                if(self.item){
+                  page = self.item
+                } else {
+                  page = self.nextPage(self)
 
-              if(p == ''){
-                console.log('There is no page')
-                self.active = false
-              }
+                  if(!page){
+                    self.active = false
+                    return
+                  }
+                }
 
-              var page = p.object
-              var frame = self.getFreeFrame(self)
+                var f = self.getFreeFrame(self)
 
-              if(!page.childInFrame){
-                var frame = self.frames[frame]
-                var dest = frame.position
-                var item = page.clone()
-                item.bringToFront()
-                page.opacity = 0.3
-                page.childInFrame = item
-                page.bv.content = 'X'
-                if(page.useBRFlag)
-                  page.br.content = 'X'
-                page.fn.content = frame.number
-                if(page.rw == self.WRITE)
-                  page.bs.content = 'X'
-                else
-                  page.bs.content = ''
-                self.item = item
-                self.dest = dest
-                self.running = true
+                if(f === undefined || f == null){
+                  self.hasFreeFrames = false
+                  self.item = page
+                  return
+                }
+
+                if(!page.object.childInFrame){
+                  var frame = self.frames[f - 1]
+                  var dest = frame.position
+                  var item = page.object.clone()
+                  item.bringToFront()
+                  page.object.opacity = 0.3
+                  page.object.childInFrame = item
+                  page.object.bv.content = 'X'
+                  if(page.useBRFlag)
+                    page.object.br.content = 'X'
+                  page.object.fn.content = frame.number
+                  if(page.rw == self.WRITE)
+                    page.object.bs.content = 'X'
+                  else
+                    page.object.bs.content = ''
+                  self.item = item
+                  self.dest = dest
+                  self.running = true
+                  self.moveOn = true
+                  self.pfmap[f] = page
+                }
+              } else {
+                var algoritmo = new Algoritmo(self)
+                var f = algoritmo.runFIFO()
+                var page = self.pfmap[f]
+                if(page.object.childInFrame){
+                  var item = page.object.childInFrame
+                  item.bringToFront()
+                  var dest = page.object.position
+                  page.object.bv.content = ''
+                  if(page.useBRFlag)
+                    page.object.br.content = ''
+                  self.freeFrames.push(page.object.fn.content)
+                  self.busyFrames.splice(self.busyFrames.indexOf(page.object.fn.content, 1))
+                  page.object.fn.content = ''
+                  item.page = page
+                  item.nextPage = self.item
+                  self.item = item
+                  self.dest = dest
+                  self.running = true
+                  self.moveBack = true
+                  self.pfmap[f] = undefined
+                }
               }
             }
           }

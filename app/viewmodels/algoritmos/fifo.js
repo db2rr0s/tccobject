@@ -1,9 +1,11 @@
 ﻿define(function () {
-    var Fifo = function(){
+    var Fifo = function(callQueue){
+      this.callQueue = callQueue
     }
 
     Fifo.prototype.run = function(){
-      console.log('I am just running')
+      var head = this.callQueue.shift()
+      return head
     }
 
     return Fifo

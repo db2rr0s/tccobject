@@ -7,6 +7,7 @@
         escopoSubstituicao: ko.observable(['1']),
 
         stringReferencia: ko.observable([]),
+        //stringReferencia: ko.observable(['A1w', 'B1r', 'A2r', 'B2w', 'C1r']),
 
         getConfig: function () {
 
