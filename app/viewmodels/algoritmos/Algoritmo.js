@@ -5,8 +5,8 @@ define(function(require){
   }
 
   Algoritmo.prototype.runFIFO = function(){
-    var f = new fifo(this.state.busyFrames)
-    var i = f.run()    
+    var f = new fifo(this.state.busyFrames.slice(0))
+    var i = f.run()
     return i
   }
 

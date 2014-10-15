@@ -29,8 +29,8 @@
           this.initialize()
 
           this.freeFrames = []
-          for(var i = 9; i > 0; i--){
-          //for(var i = 4; i > 0; i--){
+          //for(var i = 9; i > 0; i--){
+          for(var i = 4; i > 0; i--){
             this.freeFrames.push(i)
           }
 
@@ -290,7 +290,6 @@
         this.getFreeFrame = function(self){
           if(self.freeFrames.length > 0){
             var frame = self.freeFrames.pop()
-            self.busyFrames.push(frame)
             return frame
           }
         }
@@ -356,6 +355,7 @@
                 }
 
                 if(!page.object.childInFrame){
+                  console.log('working to move on that page')
                   var frame = self.frames[f - 1]
                   var dest = frame.position
                   var item = page.object.clone()
@@ -366,10 +366,15 @@
                   if(page.useBRFlag)
                     page.object.br.content = 'X'
                   page.object.fn.content = frame.number
+                  page.object.fnumber = frame.number
                   if(page.rw == self.WRITE)
                     page.object.bs.content = 'X'
                   else
                     page.object.bs.content = ''
+                  console.log('frame = ' + frame.number)
+                  console.log(self.busyFrames)
+                  self.busyFrames.push(frame.number)
+                  console.log(self.busyFrames)
                   self.item = item
                   self.dest = dest
                   self.running = true
@@ -379,17 +384,26 @@
               } else {
                 var algoritmo = new Algoritmo(self)
                 var f = algoritmo.runFIFO()
+
                 var page = self.pfmap[f]
                 if(page.object.childInFrame){
+                  console.log('working to move back some page')
                   var item = page.object.childInFrame
                   item.bringToFront()
                   var dest = page.object.position
                   page.object.bv.content = ''
                   if(page.useBRFlag)
                     page.object.br.content = ''
-                  self.freeFrames.push(page.object.fn.content)
-                  self.busyFrames.splice(self.busyFrames.indexOf(page.object.fn.content, 1))
+                  self.freeFrames.push(f)
+                  var fnumber = page.object.fnumber
+                  var index = self.busyFrames.indexOf(fnumber)
+                  console.log('fnumber = ' + fnumber)
+                  console.log('index = ' + index)
+                  console.log(self.busyFrames)
+                  self.busyFrames.splice(index, 1)
+                  console.log(self.busyFrames)
                   page.object.fn.content = ''
+                  page.object.fnumber = undefined
                   item.page = page
                   item.nextPage = self.item
                   self.item = item
