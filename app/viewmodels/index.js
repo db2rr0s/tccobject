@@ -29,8 +29,8 @@
           this.initialize()
 
           this.freeFrames = []
-          //for(var i = 9; i > 0; i--){
-          for(var i = 4; i > 0; i--){
+          for(var i = 9; i > 0; i--){
+          //for(var i = 4; i > 0; i--){
             this.freeFrames.push(i)
           }
 
@@ -251,6 +251,7 @@
           }
 
           this.setMarkerSource('start')
+          this.pause = false
           this.active = true
         }
 
@@ -279,12 +280,14 @@
         }
 
         this.stepByStep = function(){
-          if(this.manager.state != 0){
-            console.log('The manager is already running')
+          if(!config.validateConfig()){
+            app.showMessage("As configurações estão erradas ou incompletas!")
             return
           }
 
-          this.manager.nextStep()
+          this.setMarkerSource('start')
+          this.pause = true
+          this.active = true
         }
 
         this.getFreeFrame = function(self){
@@ -302,6 +305,7 @@
         this.moveOn = false
         this.moveBack = false
         var self = this
+        this.pause = false
 
         this.onFrame = function(event){
           if(self.active){
@@ -316,6 +320,10 @@
                   self.item = undefined
                   self.running = false
                   self.moveOn = false
+                  if(self.pause){
+                    self.setMarkerSource('begin')
+                    self.active = false
+                  }
                 }
               } else if(self.moveBack) {
                 var orig = self.item.position
@@ -344,6 +352,14 @@
                     self.active = false
                     return
                   }
+
+                  if(page.object.childInFrame){
+                    if(self.pause){
+                      self.setMarkerSource('begin')
+                      self.active = false
+                    }
+                    return
+                  }
                 }
 
                 var f = self.getFreeFrame(self)
@@ -355,7 +371,6 @@
                 }
 
                 if(!page.object.childInFrame){
-                  console.log('working to move on that page')
                   var frame = self.frames[f - 1]
                   var dest = frame.position
                   var item = page.object.clone()
@@ -371,10 +386,7 @@
                     page.object.bs.content = 'X'
                   else
                     page.object.bs.content = ''
-                  console.log('frame = ' + frame.number)
-                  console.log(self.busyFrames)
                   self.busyFrames.push(frame.number)
-                  console.log(self.busyFrames)
                   self.item = item
                   self.dest = dest
                   self.running = true
@@ -387,21 +399,17 @@
 
                 var page = self.pfmap[f]
                 if(page.object.childInFrame){
-                  console.log('working to move back some page')
                   var item = page.object.childInFrame
                   item.bringToFront()
                   var dest = page.object.position
                   page.object.bv.content = ''
                   if(page.useBRFlag)
                     page.object.br.content = ''
+                  page.object.bs.content = ''
                   self.freeFrames.push(f)
                   var fnumber = page.object.fnumber
                   var index = self.busyFrames.indexOf(fnumber)
-                  console.log('fnumber = ' + fnumber)
-                  console.log('index = ' + index)
-                  console.log(self.busyFrames)
                   self.busyFrames.splice(index, 1)
-                  console.log(self.busyFrames)
                   page.object.fn.content = ''
                   page.object.fnumber = undefined
                   item.page = page

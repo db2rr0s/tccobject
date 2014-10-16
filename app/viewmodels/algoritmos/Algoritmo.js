@@ -1,12 +1,13 @@
 define(function(require){
-  var fifo = require('./fifo')
+  var fifo = require('./Fifo')
   var Algoritmo = function(state){
     this.state = state
   }
 
   Algoritmo.prototype.runFIFO = function(){
-    var f = new fifo(this.state.busyFrames.slice(0))
-    var i = f.run()
+    var aux = this.state.busyFrames.slice(0)
+    var f = new fifo(aux)
+    var i = f.run()    
     return i
   }
 
