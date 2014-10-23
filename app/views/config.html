@@ -11,16 +11,8 @@
                 <option value="">Selecionar...</option>
                 <option value="0">Ótimo</option>
                 <option value="1">FIFO</option>
-                <option value="2">LRU</option>                
+                <option value="2">LRU</option>
                 <option value="4">Relógio FIFO Circular</option>
-            </select>
-        </div>
-        <div class="col-lg-3">
-            <h3>Carregamento</h3>
-            <select class="form-control input-sm" data-bind="selectedOptions: politicaBusca">
-                <option value="">Selecionar...</option>
-                <option value="1">Antecipada e Por Demanda</option>
-                <option value="2">Por Demanda</option>
             </select>
         </div>
         <div class="col-lg-3">
@@ -31,8 +23,24 @@
                 <option value="2">Variável</option>
             </select>
             <div id="politicaAlocacaoFrames" style="display: none; padding-top:5px;">
-                Número de Frames
-                <input type="text" class="input input-sm" data-bind="value: politicaAlocacaoFrames" placeholder="Frames" style="width: 100px;" />
+                Frames<br/>
+                <input type="text" class="input input-sm" data-bind="value: politicaAlocacaoFramesPA" placeholder="Proc A" style="width: 30%;" />
+                <input type="text" class="input input-sm" data-bind="value: politicaAlocacaoFramesPB" placeholder="Proc B" style="width: 30%;" />
+                <input type="text" class="input input-sm" data-bind="value: politicaAlocacaoFramesPC" placeholder="Proc C" style="width: 30%;" />
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <h3>Carregamento</h3>
+            <select class="form-control input-sm" data-bind="selectedOptions: politicaBusca" onchange="$('#politicaBuscaFrames').css('display', this.value == 1 ? 'block' : 'none')">
+                <option value="">Selecionar...</option>
+                <option value="1">Antecipada e Por Demanda</option>
+                <option value="2">Por Demanda</option>
+            </select>
+            <div id="politicaBuscaFrames" style="display: none; padding-top:5px;">
+                Páginas<br/>
+                <input type="text" class="input input-sm" data-bind="value: politicaBuscaFramesPA" placeholder="Proc A" style="width: 30%;" />
+                <input type="text" class="input input-sm" data-bind="value: politicaBuscaFramesPB" placeholder="Proc B" style="width: 30%;" />
+                <input type="text" class="input input-sm" data-bind="value: politicaBuscaFramesPC" placeholder="Proc C" style="width: 30%;" />
             </div>
         </div>
         <div class="col-lg-3">
@@ -62,6 +70,8 @@
         <h4>Processo A</h4>
         <small>w?</small>
         <div>
+          <input id="rwA0" type="checkbox">
+          <button class="btn input-sm" data-bind="click: addPage" value="A0" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button><br>
           <input id="rwA1" type="checkbox">
           <button class="btn input-sm" data-bind="click: addPage" value="A1" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button><br>
           <input id="rwA2" type="checkbox">
@@ -70,16 +80,14 @@
           <button class="btn input-sm" data-bind="click: addPage" value="A3" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button><br>
           <input id="rwA4" type="checkbox">
           <button class="btn input-sm" data-bind="click: addPage" value="A4" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button><br>
-          <input id="rwA5" type="checkbox">
-          <button class="btn input-sm" data-bind="click: addPage" value="A5" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button><br>
-          <!-- <input id="rwA6" type="checkbox">
-          <button class="btn input-sm" data-bind="click: addPage" value="A6" style="margin-bottom: 5px; background-color: #99FF99">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button> -->
       </div>
     </div>
     <div class="col-lg-2">
       <h4>Processo B</h4>
       <small>w?</small>
       <div>
+        <input id="rwB0" type="checkbox">
+        <button class="btn input-sm" data-bind="click: addPage" value="B0" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwB1" type="checkbox">
         <button class="btn input-sm" data-bind="click: addPage" value="B1" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwB2" type="checkbox">
@@ -88,16 +96,14 @@
         <button class="btn input-sm" data-bind="click: addPage" value="B3" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwB4" type="checkbox">
         <button class="btn input-sm" data-bind="click: addPage" value="B4" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button><br>
-        <input id="rwB5" type="checkbox">
-        <button class="btn input-sm" data-bind="click: addPage" value="B5" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button><br>
-        <!-- <input id="rwB6" type="checkbox">
-        <button class="btn input-sm" data-bind="click: addPage" value="B6" style="margin-bottom: 5px; background-color: #85D6FF">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button> -->
       </div>
     </div>
     <div class="col-lg-2">
       <h4>Processo C</h4>
       <small>w?</small>
       <div>
+        <input id="rwC0" type="checkbox">
+        <button class="btn input-sm" data-bind="click: addPage" value="C0" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwC1" type="checkbox">
         <button class="btn input-sm" data-bind="click: addPage" value="C1" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwC2" type="checkbox">
@@ -106,11 +112,19 @@
         <button class="btn input-sm" data-bind="click: addPage" value="C3" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button><br>
         <input id="rwC4" type="checkbox">
         <button class="btn input-sm" data-bind="click: addPage" value="C4" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button><br>
-        <input id="rwC5" type="checkbox">
-        <button class="btn input-sm" data-bind="click: addPage" value="C5" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button><br>
-        <!-- <input id="rwC6" type="checkbox">
-        <button class="btn input-sm" data-bind="click: addPage" value="C6" style="margin-bottom: 5px; background-color: #FFFFCC">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button> -->
       </div>
     </div>
+    <div class="col-lg-3">
+        <h4>Velocidade</h4>
+        <select class="form-control input-sm" data-bind="selectedOptions: speed">
+            <option value="2">Lento</option>
+            <option value="5">Média</option>
+            <option value="10">Rápido</option>
+            <option value="15">Muito Rápido</option>
+        </select>
+    </div>
+  </div>
+  <div class="row">
+
   </div>
 </div>

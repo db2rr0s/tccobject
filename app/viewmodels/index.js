@@ -14,6 +14,9 @@
         this.busyFrames = []
         this.movedPages = []
         this.pfmap = {}
+        this.speed = undefined
+        this.waitTime = 1
+        this.waitCallback = undefined
 
         this.initialize = function(){
           if(!this.initialized){
@@ -29,8 +32,7 @@
           this.initialize()
 
           this.freeFrames = []
-          for(var i = 9; i > 0; i--){
-          //for(var i = 4; i > 0; i--){
+          for(var i = 8; i >= 0; i--){
             this.freeFrames.push(i)
           }
 
@@ -50,7 +52,7 @@
           this.addText(510, 37, 'BS', 11)
           this.addText(535, 37, 'BR', 11)
 
-          for(var i = 1, j = frameStartY; i < 10; i++, j = j + 25){
+          for(var i = 0, j = frameStartY; i < 9; i++, j = j + 25){
             this.addText(frameTextX, j + 20, i)
             var rec = this.addRect(frameStartX, j, 100, 25)
             rec.number = i
@@ -72,7 +74,7 @@
           if(this.configuration.algoritmo != 1){
             useBRFlag = true
           }
-          for(var i = 1, j = pageAStartY; i <= pageCount; i++, j = j + 25){
+          for(var i = 0, j = pageAStartY; i < pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
               rw = this.WRITE
@@ -81,7 +83,7 @@
             this.drawPage(page, pageStartX, j, '#99FF99')
           }
 
-          for(var i = 1, j = pageBStartY; i <= pageCount; i++, j = j + 25){
+          for(var i = 0, j = pageBStartY; i < pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p2_map.indexOf(i) >= 0)
               rw = this.WRITE
@@ -90,7 +92,7 @@
             this.drawPage(page, pageStartX, j, '#85D6FF')
           }
 
-          for(var i = 1, j = pageCStartY; i <= pageCount; i++, j = j + 25){
+          for(var i = 0, j = pageCStartY; i < pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p3_map.indexOf(i) >= 0)
               rw = this.WRITE
@@ -120,16 +122,24 @@
           var fn = this.addText(x + 160, y + 20, '')
 
           this.addRect(x + 180, y, 25, 25)
-          var bv = this.addText(x + 185, y + 20, '')
+          var bv = this.addText(x + 185, y + 20, '0')
 
           this.addRect(x + 205, y, 25, 25)
-          var bs = this.addText(x + 210, y + 20, '')
+          var bs = this.addText(x + 210, y + 20, '0')
 
-          if(page.useBRFlag)
+          if(page.useBRFlag){
             this.addRect(x + 230, y, 25, 25)
-          else
+            var br = this.addText(x + 240, y + 20, '0')
+          } else {
             this.addRect(x + 230, y, 25, 25, undefined, 0.3)
-          var br = this.addText(x + 240, y + 20, '')
+            var br = new paper.PointText({
+              point: [x + 240, y + 20],
+              fontSize: 18,
+              fillColor: 'black',
+              content: '0',
+              opacity:  0.3
+            })
+          }
 
           var group = new paper.Group([pageRect,label,label2])
           group.fn = fn
@@ -167,8 +177,8 @@
           if(page.childInFrame){
             var item = page.childInFrame
             item.bringToFront()
-            page.bv.content = ''
-            page.br.content = ''
+            page.bv.content = '0'
+            page.br.content = '0'
             page.fn.content = ''
             page.opacity = 1
             page.childInFrame = undefined
@@ -200,10 +210,6 @@
                 var raster = new paper.Raster('noconf')
                 raster.position = paper.view.center
 
-                raster.onFrame = function (event) {
-                    raster.rotate(1)
-                }
-
                 new paper.PointText({
                   point: new paper.Point(paper.view.center.x, paper.view.center.y + 100),
                   justification: 'center',
@@ -216,6 +222,7 @@
             }
 
             this.configuration = config.getConfig()
+            this.speed = this.configuration.speed
             var stref = this.configuration.stringReferencia.slice(0)
 
             var rw_p1_map = []
@@ -248,6 +255,11 @@
           if(!config.validateConfig()){
             app.showMessage("As configurações estão erradas ou incompletas!")
             return
+          }
+
+          if(this.waitCallback){
+            clearTimeout(this.waitCallback)
+            this.waitCallback = undefined
           }
 
           this.setMarkerSource('start')
@@ -285,6 +297,11 @@
             return
           }
 
+          if(this.waitCallback){
+            clearTimeout(this.waitCallback)
+            this.waitCallback = undefined
+          }
+
           this.setMarkerSource('start')
           this.pause = true
           this.active = true
@@ -313,8 +330,8 @@
               if(self.moveOn){
                 var orig = self.item.position
                 var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
-                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
-                if(vector.length <= 3){
+                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/self.speed), orig.y + vector.y/(vector.length/self.speed))
+                if(vector.length <= self.speed){
                   self.item.position = self.dest
                   self.dest = undefined
                   self.item = undefined
@@ -328,8 +345,8 @@
               } else if(self.moveBack) {
                 var orig = self.item.position
                 var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
-                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/2), orig.y + vector.y/(vector.length/2))
-                if(vector.length <= 2){
+                self.item.position = new paper.Point(orig.x + vector.x/(vector.length/self.speed), orig.y + vector.y/(vector.length/self.speed))
+                if(vector.length <= self.speed){
                   self.item.page.object.opacity = 1
                   self.item.page.object.childInFrame = undefined
                   self.item.opacity = 0
@@ -358,6 +375,16 @@
                       self.setMarkerSource('begin')
                       self.active = false
                     }
+                    self.active = false
+                    self.waitCallback = setTimeout(function(){
+                      self.waitCallback = undefined
+                      if(self.pause){
+                        self.setMarkerSource('begin')
+                        self.active = false
+                      } else {
+                        self.active = true
+                      }
+                    }, self.waitTime * 1000)
                     return
                   }
                 }
@@ -371,21 +398,21 @@
                 }
 
                 if(!page.object.childInFrame){
-                  var frame = self.frames[f - 1]
+                  var frame = self.frames[f]
                   var dest = frame.position
                   var item = page.object.clone()
                   item.bringToFront()
                   page.object.opacity = 0.3
                   page.object.childInFrame = item
-                  page.object.bv.content = 'X'
+                  page.object.bv.content = '1'
                   if(page.useBRFlag)
-                    page.object.br.content = 'X'
+                    page.object.br.content = '1'
                   page.object.fn.content = frame.number
                   page.object.fnumber = frame.number
                   if(page.rw == self.WRITE)
-                    page.object.bs.content = 'X'
+                    page.object.bs.content = '1'
                   else
-                    page.object.bs.content = ''
+                    page.object.bs.content = '0'
                   self.busyFrames.push(frame.number)
                   self.item = item
                   self.dest = dest
@@ -402,10 +429,10 @@
                   var item = page.object.childInFrame
                   item.bringToFront()
                   var dest = page.object.position
-                  page.object.bv.content = ''
+                  page.object.bv.content = '0'
                   if(page.useBRFlag)
-                    page.object.br.content = ''
-                  page.object.bs.content = ''
+                    page.object.br.content = '0'
+                  page.object.bs.content = '0'
                   self.freeFrames.push(f)
                   var fnumber = page.object.fnumber
                   var index = self.busyFrames.indexOf(fnumber)
