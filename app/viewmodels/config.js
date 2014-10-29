@@ -1,6 +1,6 @@
 ﻿define(['knockout'], function (ko) {
     return {
-        algoritmo: ko.observable(['1']),
+        algoritmo: ko.observable(['0']),
         politicaBusca: ko.observable(['2']),
         politicaBuscaFramesPA: ko.observable(),
         politicaBuscaFramesPB: ko.observable(),
@@ -12,7 +12,7 @@
         escopoSubstituicao: ko.observable(['1']),
         speed: ko.observable(['5']),
 
-        stringReferencia: ko.observable([]),
+        stringReferencia: ko.observable(['C3r','C2r','B2r','A2r','A1r','B1r','C1r','C0r','B0r','A0r','C4r','C3r','C2r','C1r','C0r','B4r','B3r','B2r','B1r','B0r','A4r','A3r','A2r','A1r','A0r']),
 
         getConfig: function () {
 

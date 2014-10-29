@@ -346,7 +346,7 @@
                 var orig = self.item.position
                 var vector = new paper.Point(self.dest.x - orig.x, self.dest.y - orig.y)
                 self.item.position = new paper.Point(orig.x + vector.x/(vector.length/self.speed), orig.y + vector.y/(vector.length/self.speed))
-                if(vector.length <= self.speed){
+                if(vector.length <= self.speed || self.item.page.rw == self.READ){
                   self.item.page.object.opacity = 1
                   self.item.page.object.childInFrame = undefined
                   self.item.opacity = 0
@@ -421,8 +421,22 @@
                   self.pfmap[f] = page
                 }
               } else {
+                var f = -1
                 var algoritmo = new Algoritmo(self)
-                var f = algoritmo.runFIFO()
+                switch(self.configuration.algoritmo){
+                  case '0':
+                    f = algoritmo.runOtimo()
+                    break;
+                  case '1':
+                    f = algoritmo.runFIFO()
+                    break;
+                  case '2':
+                    f = algoritmo.runLRU()
+                    break;
+                  case '3':
+                    f = algoritmo.runReloFIFOCirc()
+                    break;
+                }                
 
                 var page = self.pfmap[f]
                 if(page.object.childInFrame){

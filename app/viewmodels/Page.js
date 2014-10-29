@@ -14,6 +14,10 @@ define(function(require){
     return this
   }
 
+  Page.prototype.toString = function(){
+    return this.proc + this.number + this.rw.toLowerCase()
+  }
+
   Page.prototype.setObject = function(obj){
     this.object = obj
   }
