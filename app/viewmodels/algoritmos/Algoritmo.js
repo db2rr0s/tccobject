@@ -36,10 +36,22 @@ define(function(require){
   }
 
   Algoritmo.prototype.runLRU = function(){
-    var aux = this.state.busyFrames.slice(0)
-    var f = new fifo(aux)
-    var i = f.run()
-    return i
+    var aux = []
+    for(var i = 0; i <= 8; i++){
+      aux.push(this.state.pfmap[i].toString())
+    }
+
+    var aux2 = this.state.callHistory.slice(0)
+    var f = new lru(aux, aux2)
+    var p = f.run()
+
+    var page = new Page()
+    page.parse(p)
+
+    for(var i = 0; i <= 8; i++){
+      if(this.state.pfmap[i].equals(page))
+        return i;
+    }
   }
 
   Algoritmo.prototype.runReloFIFOCirc = function(){

@@ -12,7 +12,7 @@
         this.configuration = undefined
         this.freeFrames = []
         this.busyFrames = []
-        this.movedPages = []
+        this.callHistory = []
         this.pfmap = {}
         this.speed = undefined
         this.waitTime = 1
@@ -285,6 +285,7 @@
             return
           }
 
+          self.callHistory.push(call)
           var page = new Page()
           page.parse(call)
 
@@ -436,7 +437,7 @@
                   case '3':
                     f = algoritmo.runReloFIFOCirc()
                     break;
-                }                
+                }
 
                 var page = self.pfmap[f]
                 if(page.object.childInFrame){
