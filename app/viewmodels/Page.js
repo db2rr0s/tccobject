@@ -3,8 +3,13 @@ define(function(require){
     this.proc = proc
     this.number = number
     this.rw = rw
-    this.object = undefined
     this.useBRFlag = (br || false)
+
+    this.object = undefined
+    this.pf = undefined
+    this.bv = undefined
+    this.bs = undefined
+    this.br = undefined
   }
 
   Page.prototype.parse = function(str){
@@ -16,10 +21,6 @@ define(function(require){
 
   Page.prototype.toString = function(){
     return this.proc + this.number + this.rw.toLowerCase()
-  }
-
-  Page.prototype.setObject = function(obj){
-    this.object = obj
   }
 
   Page.prototype.equals = function(page){

@@ -1,6 +1,6 @@
 ﻿define(['knockout'], function (ko) {
     return {
-        algoritmo: ko.observable(['']),
+        algoritmo: ko.observable(['1']),
         politicaBusca: ko.observable(['2']),
         politicaBuscaFramesPA: ko.observable(),
         politicaBuscaFramesPB: ko.observable(),
@@ -12,7 +12,7 @@
         escopoSubstituicao: ko.observable(['1']),
         speed: ko.observable(['5']),
 
-        stringReferencia: ko.observable([]),
+        stringReferencia: ko.observable(['B0r']),
 
         getConfig: function () {
 
@@ -21,13 +21,16 @@
 
             return {
                 'algoritmo': this.algoritmo()[0],
-                'politicaBusca': this.politicaBusca()[0],
-                'politicaAlocacao': this.politicaAlocacao()[0],
-                'politicaAlocacaoFramesPA': this.politicaAlocacaoFramesPA(),
-                'politicaAlocacaoFramesPB': this.politicaAlocacaoFramesPB(),
-                'politicaAlocacaoFramesPC': this.politicaAlocacaoFramesPC(),
-                'escopoSubstituicao': this.escopoSubstituicao()[0],
-                'stringReferencia': this.stringReferencia(),
+                'alocacao': this.politicaAlocacao()[0],
+                'alocacaoFrameA': this.politicaAlocacaoFramesPA(),
+                'alocacaoFrameB': this.politicaAlocacaoFramesPB(),
+                'alocacaoFrameC': this.politicaAlocacaoFramesPC(),
+                'busca': this.politicaBusca()[0],
+                'buscaPageA': this.politicaBuscaFramesPA(),
+                'buscaPageB': this.politicaBuscaFramesPB(),
+                'buscaPageC': this.politicaBuscaFramesPC(),
+                'escopo': this.escopoSubstituicao()[0],
+                'stringRef': this.stringReferencia(),
                 'speed': parseInt(this.speed()[0])
             }
         },

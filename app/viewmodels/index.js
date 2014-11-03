@@ -1,22 +1,20 @@
-﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/Page', 'viewmodels/algoritmos/Algoritmo'], function (app, ko, paper, config, Page, Algoritmo) {
+﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/MMU', 'viewmodels/Page', 'viewmodels/algoritmos/Algoritmo'], function (app, ko, paper, config, MMU, Page, Algoritmo) {
     return function () {
         this.title = "TCCObject"
-        this.frames = []
-        this.pages = []
-        this.initialized = false
-        this.marker_left = undefined
-        this.marker_right = undefined
         this.callStack = ko.observable([])
         this.READ = 'R'
         this.WRITE = 'W'
-        this.configuration = undefined
-        this.freeFrames = []
-        this.busyFrames = []
-        this.callHistory = []
-        this.pfmap = {}
+        this.initialized = false
+        this.marker_left = undefined
+        this.marker_right = undefined
         this.speed = undefined
         this.waitTime = 1
         this.waitCallback = undefined
+
+        this.frames = []
+        this.mmu = undefined
+        this.configuration = undefined
+        this.stateCallback = undefined
 
         this.initialize = function(){
           if(!this.initialized){
@@ -31,11 +29,9 @@
         this.load = function(rw_p1_map, rw_p2_map, rw_p3_map){
           this.initialize()
 
-          this.freeFrames = []
-          for(var i = 8; i >= 0; i--){
-            this.freeFrames.push(i)
-          }
-
+          this.stateCallback = { 'recall': this.recallStateCallback,
+                                 'pageIn': this.pageInStateCallback,
+                                 'pageOut': this.pageOutStateCallback }
           var frameStartY = 40
           var frameTextX = 60
           var frameStartX = 75
@@ -74,6 +70,10 @@
           if(this.configuration.algoritmo == 3){
             useBRFlag = true
           }
+
+          var pagesA = [],
+              pagesB = [],
+              pagesC = []
           for(var i = 0, j = pageAStartY; i < pageCount; i++, j = j + 25){
             var rw = this.READ
             if(rw_p1_map.indexOf(i) >= 0)
@@ -81,6 +81,7 @@
 
             var page = new Page('A', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#99FF99')
+            pagesA.push(page)
           }
 
           for(var i = 0, j = pageBStartY; i < pageCount; i++, j = j + 25){
@@ -90,6 +91,7 @@
 
             var page = new Page('B', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#85D6FF')
+            pagesB.push(page)
           }
 
           for(var i = 0, j = pageCStartY; i < pageCount; i++, j = j + 25){
@@ -99,7 +101,14 @@
 
             var page = new Page('C', i, rw, useBRFlag)
             this.drawPage(page, pageStartX, j, '#FFFFCC')
+            pagesC.push(page)
           }
+
+          this.mmu = new MMU(this.configuration.algoritmo, this.configuration.alocacao,
+                             this.configuration.alocacaoFrameA, this.configuration.alocacaoFrameB, this.configuration.alocacaoFrameC,
+                             this.configuration.busca,
+                             this.configuration.buscaPageA, this.configuration.buscaPageB, this.configuration.buscaPageC, this.configuration.escopo,
+                             pagesA, pagesB, pagesC)
 
           paper.view.draw()
         }
@@ -119,7 +128,7 @@
           this.addText(x + 135, y + 20, page.number)
 
           this.addRect(x + 155, y, 25, 25)
-          var fn = this.addText(x + 160, y + 20, '')
+          var pf = this.addText(x + 160, y + 20, '')
 
           this.addRect(x + 180, y, 25, 25)
           var bv = this.addText(x + 185, y + 20, '0')
@@ -142,12 +151,11 @@
           }
 
           var group = new paper.Group([pageRect,label,label2])
-          group.fn = fn
-          group.bv = bv
-          group.bs = bs
-          group.br = br
-          page.setObject(group)
-          this.pages.push(page)
+          page.pf = pf
+          page.bv = bv
+          page.bs = bs
+          page.br = br
+          page.object = group
         }
 
         this.addText = function(x, y, content, fontSize){
@@ -171,20 +179,6 @@
           })
 
           return rect
-        }
-
-        this.discardPage = function(page){
-          if(page.childInFrame){
-            var item = page.childInFrame
-            item.bringToFront()
-            page.bv.content = '0'
-            page.br.content = '0'
-            page.fn.content = ''
-            page.opacity = 1
-            page.childInFrame = undefined
-            item.onFrame = undefined
-            item.opacity = 0
-          }
         }
 
         this.setMarkerSource = function(source){
@@ -223,7 +217,7 @@
 
             this.configuration = config.getConfig()
             this.speed = this.configuration.speed
-            var stref = this.configuration.stringReferencia.slice(0)
+            var stref = this.configuration.stringRef.slice(0)
 
             var rw_p1_map = []
             var rw_p2_map = []
@@ -267,31 +261,6 @@
           this.active = true
         }
 
-        this.findPage = function(self, page){
-          for(var i = 0; i < self.pages.length; i++){
-            var aux = self.pages[i]
-            if(page.equals(aux))
-              return aux
-          }
-        }
-
-        this.nextPage = function(self){
-          var _callStack = self.callStack()
-          var call = _callStack.pop()
-          self.callStack(_callStack)
-
-          if(call === undefined){
-            self.setMarkerSource('end')
-            return
-          }
-
-          self.callHistory.push(call)
-          var page = new Page()
-          page.parse(call)
-
-          return self.findPage(self, page)
-        }
-
         this.stepByStep = function(){
           if(!config.validateConfig()){
             app.showMessage("As configurações estão erradas ou incompletas!")
@@ -308,13 +277,6 @@
           this.active = true
         }
 
-        this.getFreeFrame = function(self){
-          if(self.freeFrames.length > 0){
-            var frame = self.freeFrames.pop()
-            return frame
-          }
-        }
-
         this.active = false
         this.running = false
         this.item = undefined
@@ -322,8 +284,8 @@
         this.hasFreeFrames = true
         this.moveOn = false
         this.moveBack = false
-        var self = this
         this.pause = false
+        var self = this
 
         this.onFrame = function(event){
           if(self.active){
@@ -352,119 +314,68 @@
                   self.item.page.object.childInFrame = undefined
                   self.item.opacity = 0
                   self.dest = undefined
-                  self.item = self.item.nextPage
                   self.running = false
                   self.moveBack = false
-                  self.hasFreeFrames = true
+                  self.pageInStateCallback(self.item.page.nextPage)
                 }
               }
             } else {
-              if(self.hasFreeFrames) {
-                var page
-                if(self.item){
-                  page = self.item
-                } else {
-                  page = self.nextPage(self)
+              var _callStack = self.callStack()
+              var call = _callStack.pop()
+              self.callStack(_callStack)
 
-                  if(!page){
-                    self.active = false
-                    return
-                  }
-
-                  if(page.object.childInFrame){
-                    if(self.pause){
-                      self.setMarkerSource('begin')
-                      self.active = false
-                    }
-                    self.active = false
-                    self.waitCallback = setTimeout(function(){
-                      self.waitCallback = undefined
-                      if(self.pause){
-                        self.setMarkerSource('begin')
-                        self.active = false
-                      } else {
-                        self.active = true
-                      }
-                    }, self.waitTime * 1000)
-                    return
-                  }
-                }
-
-                var f = self.getFreeFrame(self)
-
-                if(f === undefined || f == null){
-                  self.hasFreeFrames = false
-                  self.item = page
-                  return
-                }
-
-                if(!page.object.childInFrame){
-                  var frame = self.frames[f]
-                  var dest = frame.position
-                  var item = page.object.clone()
-                  item.bringToFront()
-                  page.object.opacity = 0.3
-                  page.object.childInFrame = item
-                  page.object.bv.content = '1'
-                  if(page.useBRFlag)
-                    page.object.br.content = '1'
-                  page.object.fn.content = frame.number
-                  page.object.fnumber = frame.number
-                  if(page.rw == self.WRITE)
-                    page.object.bs.content = '1'
-                  else
-                    page.object.bs.content = '0'
-                  self.busyFrames.push(frame.number)
-                  self.item = item
-                  self.dest = dest
-                  self.running = true
-                  self.moveOn = true
-                  self.pfmap[f] = page
-                }
-              } else {
-                var f = -1
-                var algoritmo = new Algoritmo(self)
-                switch(self.configuration.algoritmo){
-                  case '0':
-                    f = algoritmo.runOtimo()
-                    break;
-                  case '1':
-                    f = algoritmo.runFIFO()
-                    break;
-                  case '2':
-                    f = algoritmo.runLRU()
-                    break;
-                  case '3':
-                    f = algoritmo.runReloFIFOCirc()
-                    break;
-                }
-
-                var page = self.pfmap[f]
-                if(page.object.childInFrame){
-                  var item = page.object.childInFrame
-                  item.bringToFront()
-                  var dest = page.object.position
-                  page.object.bv.content = '0'
-                  if(page.useBRFlag)
-                    page.object.br.content = '0'
-                  page.object.bs.content = '0'
-                  self.freeFrames.push(f)
-                  var fnumber = page.object.fnumber
-                  var index = self.busyFrames.indexOf(fnumber)
-                  self.busyFrames.splice(index, 1)
-                  page.object.fn.content = ''
-                  page.object.fnumber = undefined
-                  item.page = page
-                  item.nextPage = self.item
-                  self.item = item
-                  self.dest = dest
-                  self.running = true
-                  self.moveBack = true
-                  self.pfmap[f] = undefined
-                }
+              if(call === undefined){
+                self.setMarkerSource('end')
+                self.active = false
+                return
               }
+
+              var state = self.mmu.nextCall(call)
+              self.stateCallback[state['state']](state['page'])
             }
           }
+        }
+
+        this.recallStateCallback = function(page){
+          if(self.pause){
+            self.setMarkerSource('begin')
+            self.active = false
+          }
+          self.active = false
+          self.waitCallback = setTimeout(function(){
+            self.waitCallback = undefined
+            if(self.pause){
+              self.setMarkerSource('begin')
+              self.active = false
+            } else {
+              self.active = true
+            }
+          }, self.waitTime * 1000)
+          return
+        }
+
+        this.pageOutStateCallback = function(page){
+          var item = page.object.childInFrame
+          item.bringToFront()
+          var dest = page.object.position
+          item.page = page
+          self.item = item
+          self.dest = dest
+          self.running = true
+          self.moveBack = true
+        }
+
+        this.pageInStateCallback = function(page){
+          var frame = self.frames[page.pf.content]
+          var dest = frame.position
+          var item = page.object.clone()
+          item.bringToFront()
+          page.object.opacity = 0.3
+          page.object.childInFrame = item
+          self.item = item
+          self.dest = dest
+          self.running = true
+          self.moveOn = true
         }
       }
     }

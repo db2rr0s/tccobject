@@ -3,7 +3,7 @@
       this.callQueue = callQueue
     }
 
-    Fifo.prototype.run = function(){
+    Fifo.prototype.run = function(){      
       var head = this.callQueue.shift()
       return head
     }
