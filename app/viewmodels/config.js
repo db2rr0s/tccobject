@@ -1,18 +1,18 @@
 ﻿define(['knockout'], function (ko) {
     return {
-        algoritmo: ko.observable(['1']),
-        politicaBusca: ko.observable(['2']),
-        politicaBuscaFramesPA: ko.observable(),
-        politicaBuscaFramesPB: ko.observable(),
-        politicaBuscaFramesPC: ko.observable(),
-        politicaAlocacao: ko.observable(['2']),
-        politicaAlocacaoFramesPA: ko.observable(),
-        politicaAlocacaoFramesPB: ko.observable(),
-        politicaAlocacaoFramesPC: ko.observable(),
-        escopoSubstituicao: ko.observable(['1']),
+        algoritmo: ko.observable(['']),
+        politicaBusca: ko.observable(['']),
+        politicaBuscaFramesPA: ko.observable(2),
+        politicaBuscaFramesPB: ko.observable(2),
+        politicaBuscaFramesPC: ko.observable(2),
+        politicaAlocacao: ko.observable(['']),
+        politicaAlocacaoFramesPA: ko.observable(3),
+        politicaAlocacaoFramesPB: ko.observable(3),
+        politicaAlocacaoFramesPC: ko.observable(3),
+        escopoSubstituicao: ko.observable(['']),
         speed: ko.observable(['5']),
 
-        stringReferencia: ko.observable(['B0r']),
+        stringReferencia: ko.observable([]),
 
         getConfig: function () {
 
@@ -37,9 +37,16 @@
         validateConfig: function () {
             var algoritmo = this.algoritmo()[0],
                 politicaBusca = this.politicaBusca()[0],
+                politicaBuscaFramesPA = this.politicaBuscaFramesPA(),
+                politicaBuscaFramesPB = this.politicaBuscaFramesPB(),
+                politicaBuscaFramesPC = this.politicaBuscaFramesPC(),
                 politicaAlocacao = this.politicaAlocacao()[0],
+                politicaAlocacaoFramesPA = this.politicaAlocacaoFramesPA(),
+                politicaAlocacaoFramesPB = this.politicaAlocacaoFramesPB(),
+                politicaAlocacaoFramesPC = this.politicaAlocacaoFramesPC(),
                 escopoSubstituicao = this.escopoSubstituicao()[0],
                 stringReferencia = this.stringReferencia()
+
 
             if (algoritmo === '' || politicaBusca === '' || politicaAlocacao === '' || escopoSubstituicao === '' || stringReferencia.length < 1)
                 return false;
@@ -71,6 +78,9 @@
 
             rw.attr('disabled', true)
           }
+
+          $('#politicaAlocacaoFrames').css('display', this.politicaAlocacao() == 1 ? 'block' : 'none')
+          $('#politicaBuscaFrames').css('display', this.politicaBusca() == 1 ? 'block' : 'none')
         }
       }
 })

@@ -104,13 +104,20 @@
             pagesC.push(page)
           }
 
-          this.mmu = new MMU(this.configuration.algoritmo, this.configuration.alocacao,
-                             this.configuration.alocacaoFrameA, this.configuration.alocacaoFrameB, this.configuration.alocacaoFrameC,
-                             this.configuration.busca,
-                             this.configuration.buscaPageA, this.configuration.buscaPageB, this.configuration.buscaPageC, this.configuration.escopo,
-                             pagesA, pagesB, pagesC)
+          try{
+            this.mmu = new MMU(this.configuration.algoritmo, this.configuration.alocacao,
+                               this.configuration.alocacaoFrameA, this.configuration.alocacaoFrameB, this.configuration.alocacaoFrameC,
+                               this.configuration.busca,
+                               this.configuration.buscaPageA, this.configuration.buscaPageB, this.configuration.buscaPageC, this.configuration.escopo,
+                               pagesA, pagesB, pagesC)
+          } catch(err){
+            this.error()
+            app.showMessage(err)
+            return false
+          }
 
           paper.view.draw()
+          return true
         }
 
         this.drawPage = function(page, x, y, color){
@@ -196,53 +203,60 @@
             this.marker_right.source = mr
         }
 
+        this.error = function(){
+          this.initialize()
+          this.setMarkerSource('end')
+
+          var raster = new paper.Raster('noconf')
+          raster.position = paper.view.center
+
+          raster.onFrame = function(event){
+            raster.rotate(0.4)
+          }
+
+          new paper.PointText({
+            point: new paper.Point(paper.view.center.x, paper.view.center.y + 100),
+            justification: 'center',
+            fontSize: 20,
+            fillColor: 'red',
+            content: 'CONFIGURAÇÕES INCOMPLETAS'
+          })
+        }
+
         this.attached = function(){
           if (!config.validateConfig()) {
-                this.initialize()
-                this.setMarkerSource('end')
+            this.error()
+            return
+          }
 
-                var raster = new paper.Raster('noconf')
-                raster.position = paper.view.center
+          this.configuration = config.getConfig()
+          this.speed = this.configuration.speed
+          var stref = this.configuration.stringRef.slice(0)
 
-                new paper.PointText({
-                  point: new paper.Point(paper.view.center.x, paper.view.center.y + 100),
-                  justification: 'center',
-                  fontSize: 20,
-                  fillColor: 'red',
-                  content: 'CONFIGURAÇÕES INCOMPLETAS'
-                })
+          var rw_p1_map = []
+          var rw_p2_map = []
+          var rw_p3_map = []
 
-                return
+          for(var i = 0; i < stref.length; i++){
+            var proc = stref[i][0]
+            var page = stref[i][1]
+            var rw = stref[i][2]
+
+            if(rw == 'w') {
+                if(proc == 'A')
+                  rw_p1_map.push(parseInt(page))
+                else if(proc == 'B')
+                  rw_p2_map.push(parseInt(page))
+                else if(proc == 'C')
+                  rw_p3_map.push(parseInt(page))
             }
+          }
 
-            this.configuration = config.getConfig()
-            this.speed = this.configuration.speed
-            var stref = this.configuration.stringRef.slice(0)
+          stref.reverse()
+          this.callStack(stref)
+          this.load(rw_p1_map, rw_p2_map, rw_p3_map)
 
-            var rw_p1_map = []
-            var rw_p2_map = []
-            var rw_p3_map = []
-
-            for(var i = 0; i < stref.length; i++){
-              var proc = stref[i][0]
-              var page = stref[i][1]
-              var rw = stref[i][2]
-
-              if(rw == 'w') {
-                  if(proc == 'A')
-                    rw_p1_map.push(parseInt(page))
-                  else if(proc == 'B')
-                    rw_p2_map.push(parseInt(page))
-                  else if(proc == 'C')
-                    rw_p3_map.push(parseInt(page))
-              }
-            }
-
-            stref.reverse()
-            this.callStack(stref)
-            this.load(rw_p1_map, rw_p2_map, rw_p3_map)
-
-            paper.view.onFrame = this.onFrame
+          paper.view.onFrame = this.onFrame
         }
 
         this.start = function () {
