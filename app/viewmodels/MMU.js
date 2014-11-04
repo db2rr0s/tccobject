@@ -22,6 +22,7 @@ define(function(require){
 
     this.busca = busca
     if(busca == 1){
+      this.ready = false
       this.buscaPageA = parseInt(buscaPageA)
       this.buscaPageB = parseInt(buscaPageB)
       this.buscaPageC = parseInt(buscaPageC)
@@ -37,8 +38,15 @@ define(function(require){
         }
       }
 
-      if((this.buscaPageA + this.buscaPageB + this.buscaPageC) > this.maxFrame + 1)
-        throw "Total de páginas de busca antecipada maior que o total de frames"
+      this.startPages = []
+      for(var i = 1; i <= this.buscaPageA; i++)
+        this.startPages.push(pagesA[i-1].toString())
+      for(var i = 1; i <= this.buscaPageB; i++)
+        this.startPages.push(pagesB[i-1].toString())
+      for(var i = 1; i <= this.buscaPageB; i++)
+        this.startPages.push(pagesC[i-1].toString())
+    } else {
+      this.ready = true
     }
 
     this.pagesA = pagesA
@@ -199,6 +207,20 @@ define(function(require){
     page.nextPage = nextPage
   }
 
+  MMU.prototype.startPage = function(){
+    var next = this.startPages.pop()
+    if(next == undefined){
+      this.ready = true
+      return
+    }
+    var page = this.findPage(new Page().parse(next))
+    if(page.useBRFlag)
+      page.br.content = 1
+    var frame = this.getFreeFrame(page)
+    this.configurePageIn(page, frame)
+    return page
+  }
+
   MMU.prototype.nextCall = function(call){
     this.callHistory.push(call)
 
@@ -263,7 +285,7 @@ define(function(require){
           }
         } else{
           f = new fifo(this.busyFramesC.slice(0))
-        }      
+        }
         return f.run()
       }
     }

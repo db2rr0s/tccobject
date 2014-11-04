@@ -334,6 +334,13 @@
                 }
               }
             } else {
+              if(!self.mmu.ready) {
+                var page = self.mmu.startPage()
+                if(page != undefined)
+                  self.pageInStateCallback(page)
+                return
+              }
+
               var _callStack = self.callStack()
               var call = _callStack.pop()
               self.callStack(_callStack)
