@@ -1,4 +1,4 @@
-﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/MMU', 'viewmodels/Page', 'viewmodels/algoritmos/Algoritmo'], function (app, ko, paper, config, MMU, Page, Algoritmo) {
+﻿define(['durandal/app', 'knockout', 'paper', 'viewmodels/config', 'viewmodels/MMU', 'viewmodels/Page'], function (app, ko, paper, config, MMU, Page) {
     return function () {
         this.title = "TCCObject"
         this.callStack = ko.observable([])
@@ -67,7 +67,7 @@
           this.addText(280, 380, 'C')
 
           var useBRFlag = false
-          if(this.configuration.algoritmo == 3){
+          if(this.configuration.algoritmo == 4){
             useBRFlag = true
           }
 
@@ -109,7 +109,7 @@
                                this.configuration.alocacaoFrameA, this.configuration.alocacaoFrameB, this.configuration.alocacaoFrameC,
                                this.configuration.busca,
                                this.configuration.buscaPageA, this.configuration.buscaPageB, this.configuration.buscaPageC, this.configuration.escopo,
-                               pagesA, pagesB, pagesC)
+                               pagesA, pagesB, pagesC, this.callStack)
           } catch(err){
             this.error()
             app.showMessage(err)

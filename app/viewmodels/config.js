@@ -1,18 +1,19 @@
 ﻿define(['knockout'], function (ko) {
     return {
-        algoritmo: ko.observable(['']),
-        politicaBusca: ko.observable(['']),
+        algoritmo: ko.observable(['1']),
+        politicaBusca: ko.observable(['2']),
         politicaBuscaFramesPA: ko.observable(2),
         politicaBuscaFramesPB: ko.observable(2),
         politicaBuscaFramesPC: ko.observable(2),
-        politicaAlocacao: ko.observable(['']),
+        politicaAlocacao: ko.observable(['2']),
         politicaAlocacaoFramesPA: ko.observable(3),
         politicaAlocacaoFramesPB: ko.observable(3),
         politicaAlocacaoFramesPC: ko.observable(3),
-        escopoSubstituicao: ko.observable(['']),
-        speed: ko.observable(['5']),
+        escopoSubstituicao: ko.observable(['1']),
+        //speed: ko.observable(['5']),
+        speed: ko.observable(['15']),
 
-        stringReferencia: ko.observable([]),
+        stringReferencia: ko.observable(['A0r','A1r','A2r','A3r','A4r','B0r','B1r','B2r','B3r','B4r','C0r','C1r','C2r','C3r','C4r','A0r','A1r','A2r','A3r','A4r','B0r','B1r','B2r','B3r','B4r','C0r','C1r','C2r','C3r','C4r']),
 
         getConfig: function () {
 
