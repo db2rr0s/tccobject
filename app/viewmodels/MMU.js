@@ -19,7 +19,7 @@ define(function(require){
       this.buscaPageC = parseInt(buscaPageC)
       if((this.buscaPageA + this.buscaPageB + this.buscaPageC) > this.maxFrame + 1)
         throw "Busca antecipada soma mais que total de frames"
-        
+
       this.startPages = []
       for(var i = 1; i <= this.buscaPageA; i++)
         this.startPages.push(pagesA[i-1].toString())
@@ -49,7 +49,7 @@ define(function(require){
       this.totalFrames['A'] = this.buscaPageA
       this.totalFrames['B'] = this.buscaPageB
       this.totalFrames['C'] = this.buscaPageC
-    } else {
+    } else if(escopo == 2){
       this.maxFrameA = 1
       this.maxFrameB = 3
       this.maxFrameC = 5
@@ -57,6 +57,8 @@ define(function(require){
       this.totalFrames['A'] = 2
       this.totalFrames['B'] = 2
       this.totalFrames['C'] = 2
+    } else{
+      this.maxFrameC = -1
     }
 
     if(this.alocacao == 1){
@@ -138,13 +140,13 @@ define(function(require){
     }
   }
 
-  MMU.prototype.getFreeFrame = function(page){
+  MMU.prototype.getFreeFrame = function(page){    
     var frames = this.freeFrames[page.proc]
     if(frames.length > 0){
       var frame = frames.pop()
       return frame
     } else if(this.alocacao == 2){
-      if(this.totalFrames[page.proc] > this.busyFrames[page.proc].length){
+      if(this.escopo == 1 || this.totalFrames[page.proc] > this.busyFrames[page.proc].length){
         return this.allFreeFrames.pop()
       }
     }
@@ -231,7 +233,7 @@ define(function(require){
 
   MMU.prototype.updateWorkset = function(){
     this.workset = this.workset + 1
-    if(this.alocacao != 2 || this.workset != 3){
+    if(this.alocacao != 2 || this.escopo != 2 || this.workset != 3){
       return
     }
 
