@@ -185,8 +185,6 @@ define(function(require){
       return
     }
     var page = this.findPage(new Page().parse(next))
-    if(page.useBRFlag)
-      page.br.content = 1
     var frame = this.getFreeFrame(page)
     this.configurePageIn(page, frame)
     return page
